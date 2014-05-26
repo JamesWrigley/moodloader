@@ -93,6 +93,11 @@ class MainWindow(MoodLoader):
         self.open_dialog_dir = os.path.dirname(mod_path) # Note that we reset 'self.open_dialog_dir' to the last used folder
 
 
+    def condense_mod(self, mod_name):
+        mod_name = re.findall(".*-", mod_name)[0]
+        return(mod_name[:-1])
+
+
     def populate_listviews(self):
         """
         Gets a list of map, campaign, and global mods, and populates their
@@ -105,7 +110,7 @@ class MainWindow(MoodLoader):
             map_mods = [mod for mod in os.listdir(self.config_dir + "/maps/")
                         if os.path.isfile(self.config_dir + "/maps/" + mod)]
             for mod in map_mods:
-                mod_item = QtGui.QStandardItem(mod)
+                mod_item = QtGui.QStandardItem(self.condense_mod(mod))
                 mod_item.setSizeHint(mod_size)
                 mod_item.setToolTip(mod)
                 mod_item.setEditable(False)
@@ -115,7 +120,7 @@ class MainWindow(MoodLoader):
             cam_mods = [mod for mod in os.listdir(self.config_dir + "/campaign/")
                         if os.path.isfile(self.config_dir + "/campaign/" + mod)]
             for mod in cam_mods:
-                mod_item = QtGui.QStandardItem(mod)
+                mod_item = QtGui.QStandardItem(self.condense_mod(mod))
                 mod_item.setSizeHint(mod_size)
                 mod_item.setToolTip(mod)
                 mod_item.setEditable(False)
@@ -125,7 +130,7 @@ class MainWindow(MoodLoader):
             global_mods = [mod for mod in os.listdir(self.config_dir + "/global/")
                            if os.path.isfile(self.config_dir + "/global/" + mod)]
             for mod in global_mods:
-                mod_item = QtGui.QStandardItem(mod)
+                mod_item = QtGui.QStandardItem(self.condense_mod(mod))
                 mod_item.setSizeHint(mod_size)
                 mod_item.setToolTip(mod)
                 mod_item.setEditable(False)
