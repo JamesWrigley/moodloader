@@ -89,13 +89,17 @@ class MainWindow(MoodLoader):
             return
 
         shutil.copy(mod_path, mod_install_path)
+        self.populate_listviews()
         self.statusbar.showMessage("Map installed!")
         self.open_dialog_dir = os.path.dirname(mod_path) # Note that we reset 'self.open_dialog_dir' to the last used folder
 
 
     def condense_mod(self, mod_name):
-        mod_name = re.findall(".*-", mod_name)[0]
-        return(mod_name[:-1])
+        if len(mod_name) > 64:
+            mod_name = re.findall(".*-", mod_name)[0]
+            return(mod_name[:-1])
+        else:
+            return(mod_name.replace(".wz", ""))
 
 
     def populate_listviews(self):
