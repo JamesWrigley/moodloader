@@ -54,7 +54,7 @@ class MainWindow(MoodLoader):
         self.map_mods_listview.connect(self.map_mods_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
                                        lambda: self.listview_menu("map"))
         self.cam_mods_listview.connect(self.cam_mods_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
-                                       lambda: self.listview_menu)
+                                       lambda: self.listview_menu("cam"))
         self.global_mods_listview.connect(self.global_mods_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
                                           lambda: self.listview_menu("global"))
 
@@ -115,7 +115,7 @@ class MainWindow(MoodLoader):
             mod_name = self.global_mods_listview.currentIndex().data()
             mod_folder = self.config_dir + "/global/"
 
-        # Get the full name from the partial 'mod_name'
+        # Get the full file name from the partial 'mod_name'
         mod_name = next((mod for mod in os.listdir(mod_folder) if mod.__contains__(mod_name)))
         os.remove(mod_folder + mod_name)
         self.populate_listviews()
@@ -142,10 +142,11 @@ class MainWindow(MoodLoader):
         # We need this to elide the text
         mod_size = QtCore.QSize(50, 15)
 
-        if os.path.isdir(self.config_dir + "/maps/"):
-            # Clear all the previous data
-            self.map_data_model.clear()
+        # Clear all existing items
+        for model in [self.map_data_model, self.cam_data_model, self.global_data_model]:
+            model.clear()
 
+        if os.path.isdir(self.config_dir + "/maps/"):
             map_mods = [mod for mod in os.listdir(self.config_dir + "/maps/")
                         if os.path.isfile(self.config_dir + "/maps/" + mod) and mod.__contains__(".wz")]
             for mod in map_mods:
@@ -155,9 +156,7 @@ class MainWindow(MoodLoader):
                 mod_item.setEditable(False)
                 self.map_data_model.appendRow(mod_item)
 
-        if os.path.isdir(self.config_dir + "/campaign"):
-            self.cam_data_model.clear()
-
+        if os.path.isdir(self.config_dir + "/campaign/"):
             cam_mods = [mod for mod in os.listdir(self.config_dir + "/campaign/")
                         if os.path.isfile(self.config_dir + "/campaign/" + mod) and mod.__contains__(".wz")]
             for mod in cam_mods:
@@ -168,8 +167,6 @@ class MainWindow(MoodLoader):
                 self.cam_data_model.appendRow(mod_item)
 
         if os.path.isdir(self.config_dir + "/global/"):
-            self.global_data_model.clear()
-
             global_mods = [mod for mod in os.listdir(self.config_dir + "/global/")
                            if os.path.isfile(self.config_dir + "/global/" + mod) and mod.__contains__(".wz")]
             for mod in global_mods:
