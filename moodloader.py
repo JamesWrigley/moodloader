@@ -47,10 +47,16 @@ class MainWindow(MoodLoader):
 
         ### Set up the QListView's
         self.populate_listviews()
-        for view in [self.map_mods_listview, self.cam_mods_listview, self.global_mods_listview]:
-            view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-            view.connect(view, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
-                         self.listview_menu)
+        for listview in [self.map_mods_listview, self.cam_mods_listview, self.global_mods_listview]:
+            listview.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+
+        # Connect each QListView to send its mod type to 'self.listview()'
+        self.map_mods_listview.connect(self.map_mods_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
+                                       lambda: self.listview_menu("map"))
+        self.cam_mods_listview.connect(self.cam_mods_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
+                                       lambda: self.listview_menu)
+        self.global_mods_listview.connect(self.global_mods_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
+                                          lambda: self.listview_menu("global"))
 
 
     def get_config_path(self):
@@ -94,6 +100,28 @@ class MainWindow(MoodLoader):
         self.open_dialog_dir = os.path.dirname(mod_path) # Note that we reset 'self.open_dialog_dir' to the last used folder
 
 
+    def delete_mod(self, mod_type):
+        """
+        As abundantly clear from the name, this method deletes the currently
+        selected mod.
+        """
+        if mod_type == "map":
+            mod_name = self.map_mods_listview.currentIndex().data()
+            mod_folder = self.config_dir + "/maps/"
+        elif mod_type == "cam":
+            mod_name = self.cam_mods_listview.currentIndex().data()
+            mod_folder = self.config_dir + "/campaign/"
+        elif mod_type == "global":
+            mod_name = self.global_mods_listview.currentIndex().data()
+            mod_folder = self.config_dir + "/global/"
+
+        # Get the full name from the partial 'mod_name'
+        mod_name = next((mod for mod in os.listdir(mod_folder) if mod.__contains__(mod_name)))
+        os.remove(mod_folder + mod_name)
+        self.populate_listviews()
+        self.statusbar.showMessage("Mod successfully deleted!")
+
+
     def condense_mod(self, mod_name):
         """
         A little helper function to pretty-ify output for the QListView's.
@@ -115,6 +143,9 @@ class MainWindow(MoodLoader):
         mod_size = QtCore.QSize(50, 15)
 
         if os.path.isdir(self.config_dir + "/maps/"):
+            # Clear all the previous data
+            self.map_data_model.clear()
+
             map_mods = [mod for mod in os.listdir(self.config_dir + "/maps/")
                         if os.path.isfile(self.config_dir + "/maps/" + mod) and mod.__contains__(".wz")]
             for mod in map_mods:
@@ -125,6 +156,8 @@ class MainWindow(MoodLoader):
                 self.map_data_model.appendRow(mod_item)
 
         if os.path.isdir(self.config_dir + "/campaign"):
+            self.cam_data_model.clear()
+
             cam_mods = [mod for mod in os.listdir(self.config_dir + "/campaign/")
                         if os.path.isfile(self.config_dir + "/campaign/" + mod) and mod.__contains__(".wz")]
             for mod in cam_mods:
@@ -135,6 +168,8 @@ class MainWindow(MoodLoader):
                 self.cam_data_model.appendRow(mod_item)
 
         if os.path.isdir(self.config_dir + "/global/"):
+            self.global_data_model.clear()
+
             global_mods = [mod for mod in os.listdir(self.config_dir + "/global/")
                            if os.path.isfile(self.config_dir + "/global/" + mod) and mod.__contains__(".wz")]
             for mod in global_mods:
@@ -145,13 +180,20 @@ class MainWindow(MoodLoader):
                 self.global_data_model.appendRow(mod_item)
 
 
-    def listview_menu(self):
+    def listview_menu(self, mod_type):
         """
         Called when a QListView item is right-clicked on, lets the user delete
         the selected mod.
         """
+        # Create the delete action
+        delete_mod_action = QtGui.QAction("Delete Mod", self)
+        delete_mod_action.triggered.connect(lambda: self.delete_mod(mod_type))
+
+        # Create the menu, and display it at the cursor position
         menu = QtGui.QMenu("Options", self)
-        menu.addAction("Delete Mod")
+        menu.addAction(delete_mod_action)
+
+        menu.exec_(QtGui.QCursor.pos())
 
 
 def main():
