@@ -71,7 +71,7 @@ class MainWindow(MoodLoader):
         if len(matching_dir_versions) >= 1:
             return(os.path.expanduser("~") + "/.warzone2100-" + str(max(matching_dir_versions)))
         else:
-            self.statusbar.showMessage("No config folder found!")
+            self.statusbar.showMessage("No config folder found.")
             return("")
 
 
@@ -91,12 +91,12 @@ class MainWindow(MoodLoader):
         elif not os.path.isdir(mod_install_path):
             os.mkdir(mod_install_path)
         elif os.path.isfile(mod_install_path + mod_name):
-            self.statusbar.showMessage("Mod already installed!")
+            self.statusbar.showMessage("Mod already installed.")
             return
 
         shutil.copy(mod_path, mod_install_path)
         self.populate_listviews()
-        self.statusbar.showMessage("Map installed!")
+        self.statusbar.showMessage("Map installed.")
         self.open_dialog_dir = os.path.dirname(mod_path) # Note that we reset 'self.open_dialog_dir' to the last used folder
 
 
@@ -119,7 +119,7 @@ class MainWindow(MoodLoader):
         mod_name = next((mod for mod in os.listdir(mod_folder) if mod.__contains__(mod_name)))
         os.remove(mod_folder + mod_name)
         self.populate_listviews()
-        self.statusbar.showMessage("Mod successfully deleted!")
+        self.statusbar.showMessage("Mod successfully deleted.")
 
 
     def condense_mod(self, mod_name):
@@ -146,35 +146,41 @@ class MainWindow(MoodLoader):
         for model in [self.map_data_model, self.cam_data_model, self.global_data_model]:
             model.clear()
 
+        # We need to declare these ahead of time to avoid errors later on when
+        # giving the mods their properties and adding them to their models
+        map_mods = []
+        cam_mods = []
+        global_mods = []
+
+        # Populate lists with mods
         if os.path.isdir(self.config_dir + "/maps/"):
             map_mods = [mod for mod in os.listdir(self.config_dir + "/maps/")
                         if os.path.isfile(self.config_dir + "/maps/" + mod) and mod.__contains__(".wz")]
-            for mod in map_mods:
-                mod_item = QtGui.QStandardItem(self.condense_mod(mod))
-                mod_item.setSizeHint(mod_size)
-                mod_item.setToolTip(mod)
-                mod_item.setEditable(False)
-                self.map_data_model.appendRow(mod_item)
 
         if os.path.isdir(self.config_dir + "/campaign/"):
             cam_mods = [mod for mod in os.listdir(self.config_dir + "/campaign/")
                         if os.path.isfile(self.config_dir + "/campaign/" + mod) and mod.__contains__(".wz")]
-            for mod in cam_mods:
-                mod_item = QtGui.QStandardItem(self.condense_mod(mod))
-                mod_item.setSizeHint(mod_size)
-                mod_item.setToolTip(mod)
-                mod_item.setEditable(False)
-                self.cam_data_model.appendRow(mod_item)
 
         if os.path.isdir(self.config_dir + "/global/"):
             global_mods = [mod for mod in os.listdir(self.config_dir + "/global/")
                            if os.path.isfile(self.config_dir + "/global/" + mod) and mod.__contains__(".wz")]
-            for mod in global_mods:
-                mod_item = QtGui.QStandardItem(self.condense_mod(mod))
-                mod_item.setSizeHint(mod_size)
-                mod_item.setToolTip(mod)
-                mod_item.setEditable(False)
-                self.global_data_model.appendRow(mod_item)
+
+        # Make all mods in these lists QStandardItem's to append to a QListView
+        for mod_list in [map_mods, cam_mods, global_mods]:
+            for mod in mod_list:
+                tooltip = mod
+                mod = QtGui.QStandardItem(self.condense_mod(mod))
+                mod.setSizeHint(mod_size)
+                mod.setToolTip(tooltip)
+                mod.setEditable(False)
+
+                # Append items to their appropriate models
+                if mod_list == map_mods:
+                    self.map_data_model.appendRow(mod)
+                elif mod_list == cam_mods:
+                    self.cam_data_model.appendRow(mod)
+                elif mod_list == global_mods:
+                    self.global_data_model.appendRow(mod)
 
 
     def listview_menu(self, mod_type):
