@@ -47,10 +47,10 @@ class MainWindow(MoodLoader):
 
         ### Set up the QListView's
         self.populate_listviews()
-#        for view in [self.map_mods_listview, self.cam_mods_listview, self.global_mods_listview]:
-#            view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-#            view.connect(view, QtCore.signal("customContextMenuRequested(QPoint)"),
-#                         self.listview_menu)
+        for view in [self.map_mods_listview, self.cam_mods_listview, self.global_mods_listview]:
+            view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+            view.connect(view, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
+                         self.listview_menu)
 
 
     def get_config_path(self):
@@ -95,9 +95,13 @@ class MainWindow(MoodLoader):
 
 
     def condense_mod(self, mod_name):
+        """
+        A little helper function to pretty-ify output for the QListView's.
+        """
+        # The hash length is always 64 chars, so by this we check if one is in the name
         if len(mod_name) > 64:
             mod_name = re.findall(".*-", mod_name)[0]
-            return(mod_name[:-1])
+            return(mod_name[:-1]) # Removes the trailing dash before returning
         else:
             return(mod_name.replace(".wz", ""))
 
@@ -112,7 +116,7 @@ class MainWindow(MoodLoader):
 
         if os.path.isdir(self.config_dir + "/maps/"):
             map_mods = [mod for mod in os.listdir(self.config_dir + "/maps/")
-                        if os.path.isfile(self.config_dir + "/maps/" + mod)]
+                        if os.path.isfile(self.config_dir + "/maps/" + mod) and mod.__contains__(".wz")]
             for mod in map_mods:
                 mod_item = QtGui.QStandardItem(self.condense_mod(mod))
                 mod_item.setSizeHint(mod_size)
@@ -122,7 +126,7 @@ class MainWindow(MoodLoader):
 
         if os.path.isdir(self.config_dir + "/campaign"):
             cam_mods = [mod for mod in os.listdir(self.config_dir + "/campaign/")
-                        if os.path.isfile(self.config_dir + "/campaign/" + mod)]
+                        if os.path.isfile(self.config_dir + "/campaign/" + mod) and mod.__contains__(".wz")]
             for mod in cam_mods:
                 mod_item = QtGui.QStandardItem(self.condense_mod(mod))
                 mod_item.setSizeHint(mod_size)
@@ -132,7 +136,7 @@ class MainWindow(MoodLoader):
 
         if os.path.isdir(self.config_dir + "/global/"):
             global_mods = [mod for mod in os.listdir(self.config_dir + "/global/")
-                           if os.path.isfile(self.config_dir + "/global/" + mod)]
+                           if os.path.isfile(self.config_dir + "/global/" + mod) and mod.__contains__(".wz")]
             for mod in global_mods:
                 mod_item = QtGui.QStandardItem(self.condense_mod(mod))
                 mod_item.setSizeHint(mod_size)
@@ -147,7 +151,7 @@ class MainWindow(MoodLoader):
         the selected mod.
         """
         menu = QtGui.QMenu("Options", self)
-        #        menu.addAction
+        menu.addAction("Delete Mod")
 
 
 def main():
