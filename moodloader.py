@@ -116,9 +116,16 @@ class MainWindow(MoodLoader):
 
         # Get the full file name from the partial 'mod_name'
         mod_name = next((mod for mod in os.listdir(mod_folder) if mod.__contains__(mod_name)))
-        os.remove(mod_folder + mod_name)
-        self.populate_listviews()
-        self.statusbar.showMessage("Mod successfully deleted.")
+
+        # Get confirmation from the user before deleting
+        confirmation_dialog = QtGui.QMessageBox.question(self, "Confirm Action",
+                                                         "Are you sure you want to delete this mod?",
+                                                         QtGui.QMessageBox.No,
+                                                         QtGui.QMessageBox.Yes)
+        if confirmation_dialog == QtGui.QMessageBox.Yes:
+            os.remove(mod_folder + mod_name)
+            self.populate_listviews()
+            self.statusbar.showMessage("Mod successfully deleted.")
 
 
     def condense_mod(self, mod_name):
