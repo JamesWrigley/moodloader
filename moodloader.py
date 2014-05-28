@@ -52,11 +52,11 @@ class MainWindow(MoodLoader):
 
         # Connect each QListView to send its mod type to 'self.listview()'
         self.map_mods_listview.connect(self.map_mods_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
-                                       lambda: self.listview_menu("map"))
+                                       lambda: self.listview_menu("/maps/"))
         self.cam_mods_listview.connect(self.cam_mods_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
-                                       lambda: self.listview_menu("cam"))
+                                       lambda: self.listview_menu("/campaign/"))
         self.global_mods_listview.connect(self.global_mods_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
-                                          lambda: self.listview_menu("global"))
+                                          lambda: self.listview_menu("/global/"))
 
 
     def get_config_path(self):
@@ -105,15 +105,14 @@ class MainWindow(MoodLoader):
         As abundantly clear from the name, this method deletes the currently
         selected mod.
         """
-        if mod_type == "map":
+        mod_folder = self.config_dir + mod_type
+
+        if mod_type == "/maps/":
             mod_name = self.map_mods_listview.currentIndex().data()
-            mod_folder = self.config_dir + "/maps/"
-        elif mod_type == "cam":
+        elif mod_type == "/campaign/":
             mod_name = self.cam_mods_listview.currentIndex().data()
-            mod_folder = self.config_dir + "/campaign/"
-        elif mod_type == "global":
+        elif mod_type == "/global/":
             mod_name = self.global_mods_listview.currentIndex().data()
-            mod_folder = self.config_dir + "/global/"
 
         # Get the full file name from the partial 'mod_name'
         mod_name = next((mod for mod in os.listdir(mod_folder) if mod.__contains__(mod_name)))
@@ -152,18 +151,24 @@ class MainWindow(MoodLoader):
         cam_mods = []
         global_mods = []
 
+        # A key for the list.sort() method to sort the mods naturally
+        natural_sort = lambda mod: (float(re.split("([0-9]+)", mod)[1]))
+
         # Populate lists with mods
         if os.path.isdir(self.config_dir + "/maps/"):
             map_mods = [mod for mod in os.listdir(self.config_dir + "/maps/")
                         if os.path.isfile(self.config_dir + "/maps/" + mod) and mod.__contains__(".wz")]
+            map_mods.sort(key=natural_sort)
 
         if os.path.isdir(self.config_dir + "/campaign/"):
             cam_mods = [mod for mod in os.listdir(self.config_dir + "/campaign/")
                         if os.path.isfile(self.config_dir + "/campaign/" + mod) and mod.__contains__(".wz")]
+            cam_mods.sort(key=natural_sort)
 
         if os.path.isdir(self.config_dir + "/global/"):
             global_mods = [mod for mod in os.listdir(self.config_dir + "/global/")
                            if os.path.isfile(self.config_dir + "/global/" + mod) and mod.__contains__(".wz")]
+            global_mods.sort(key=natural_sort)
 
         # Make all mods in these lists QStandardItem's to append to a QListView
         for mod_list in [map_mods, cam_mods, global_mods]:
