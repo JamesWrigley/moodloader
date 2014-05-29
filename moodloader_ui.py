@@ -1,4 +1,4 @@
-# ########################## Copyrights and license ##############################
+# ########################## Copyrights and License ##############################
 #                                                                                #
 # This file is part of MoodLoader. http://github.com/JamesWrigley/MoodLoader/    #
 #                                                                                #
@@ -99,10 +99,10 @@ class MoodLoader(QtGui.QWidget):
 
 
         ### QListViews to display existing mods ###
-        self.map_mods_listview = QtGui.QListView()
-        self.map_data_model = QtGui.QStandardItemModel(self.map_mods_listview)
-        self.map_mods_listview.setModel(self.map_data_model)
-        self.map_mods_listview.setTextElideMode(2)
+        self.maps_listview = QtGui.QListView()
+        self.map_data_model = QtGui.QStandardItemModel(self.maps_listview)
+        self.maps_listview.setModel(self.map_data_model)
+        self.maps_listview.setTextElideMode(2)
 
         self.cam_mods_listview = QtGui.QListView()
         self.cam_data_model = QtGui.QStandardItemModel(self.cam_mods_listview)
@@ -144,7 +144,7 @@ class MoodLoader(QtGui.QWidget):
         maps_vbox.insertSpacing(0, 10)
         maps_vbox.addWidget(self.install_map_button)
         maps_vbox.addWidget(self.run_map_button)
-        maps_vbox.addWidget(self.map_mods_listview)
+        maps_vbox.addWidget(self.maps_listview)
 
         cam_mods_vbox.insertSpacing(0, 10)
         cam_mods_vbox.addWidget(self.install_cam_mod_button)

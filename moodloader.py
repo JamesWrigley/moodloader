@@ -1,6 +1,6 @@
 #! /usr/bin/python3
 
-# ########################## Copyrights and license ##############################
+# ########################## Copyrights and License ##############################
 #                                                                                #
 # This file is part of MoodLoader. http://github.com/JamesWrigley/MoodLoader/    #
 #                                                                                #
@@ -41,17 +41,17 @@ class MainWindow(MoodLoader):
         self.initUI()
 
         ### Set up connections ###
-        self.install_map_button.clicked.connect(lambda: self.install_mod("/maps/"))
-        self.install_cam_mod_button.clicked.connect(lambda: self.install_mod("/campaign/"))
-        self.install_global_mod_button.clicked.connect(lambda: self.install_mod("/global/"))
+        self.install_map_button.clicked.connect(lambda: self.install_addon("/maps/"))
+        self.install_cam_mod_button.clicked.connect(lambda: self.install_addon("/campaign/"))
+        self.install_global_mod_button.clicked.connect(lambda: self.install_addon("/global/"))
 
         ### Set up the QListView's
         self.populate_listviews()
-        for listview in [self.map_mods_listview, self.cam_mods_listview, self.global_mods_listview]:
+        for listview in [self.maps_listview, self.cam_mods_listview, self.global_mods_listview]:
             listview.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
-        # Connect each QListView to send its mod type to 'self.listview()'
-        self.map_mods_listview.connect(self.map_mods_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
+        # Connect each QListView to send its addon type to 'self.listview()'
+        self.maps_listview.connect(self.maps_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
                                        lambda: self.listview_menu("/maps/"))
         self.cam_mods_listview.connect(self.cam_mods_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
                                        lambda: self.listview_menu("/campaign/"))
@@ -75,78 +75,78 @@ class MainWindow(MoodLoader):
             return("")
 
 
-    def install_mod(self, mod_type):
+    def install_addon(self, addon_type):
         """
         Install a map to the /.warzone2100-xx/maps folder.
-        Note that even the name of the argument is 'mod_type', it's actually
-        the folder name the map is to be installed into (i.e. '/maps/' for a map mod).
+        Note that even the name of the argument is 'addon_type', it's actually
+        the folder name the map is to be installed into (i.e. '/maps/' for a map).
         """
-        mod_path = QtGui.QFileDialog.getOpenFileName(self, "Select Mod", self.open_dialog_dir, "WZ Mods (*.wz);; All files (*.*)")
-        mod_install_path  = self.config_dir + mod_type
-        mod_name = os.path.basename(mod_path)
+        addon_path = QtGui.QFileDialog.getOpenFileName(self, "Select Addon", self.open_dialog_dir, "WZ Addons (*.wz);; All files (*.*)")
+        addon_install_path  = self.config_dir + addon_type
+        addon_name = os.path.basename(addon_path)
 
         # Check that all cases are covered before installing
-        if not mod_path:
+        if not addon_path:
             return
-        elif not os.path.isdir(mod_install_path):
-            os.mkdir(mod_install_path)
-        elif os.path.isfile(mod_install_path + mod_name):
-            self.statusbar.showMessage("Mod already installed.")
+        elif not os.path.isdir(addon_install_path):
+            os.mkdir(addon_install_path)
+        elif os.path.isfile(addon_install_path + addon_name):
+            self.statusbar.showMessage("Addon already installed.")
             return
 
-        shutil.copy(mod_path, mod_install_path)
+        shutil.copy(addon_path, addon_install_path)
         self.populate_listviews()
-        self.statusbar.showMessage("Map installed.")
-        self.open_dialog_dir = os.path.dirname(mod_path) # Note that we reset 'self.open_dialog_dir' to the last used folder
+        self.statusbar.showMessage("Addon installed.")
+        self.open_dialog_dir = os.path.dirname(addon_path) # Note that we reset 'self.open_dialog_dir' to the last used folder
 
 
-    def delete_mod(self, mod_type):
+    def delete_addon(self, addon_type):
         """
         As abundantly clear from the name, this method deletes the currently
-        selected mod.
+        selected addon.
         """
-        mod_folder = self.config_dir + mod_type
+        addon_folder = self.config_dir + addon_type
 
-        if mod_type == "/maps/":
-            mod_name = self.map_mods_listview.currentIndex().data()
-        elif mod_type == "/campaign/":
-            mod_name = self.cam_mods_listview.currentIndex().data()
-        elif mod_type == "/global/":
-            mod_name = self.global_mods_listview.currentIndex().data()
+        if addon_type == "/maps/":
+            addon_name = self.maps_listview.currentIndex().data()
+        elif addon_type == "/campaign/":
+            addon_name = self.cam_mods_listview.currentIndex().data()
+        elif addon_type == "/global/":
+            addon_name = self.global_mods_listview.currentIndex().data()
 
-        # Get the full file name from the partial 'mod_name'
-        mod_name = next((mod for mod in os.listdir(mod_folder) if mod.__contains__(mod_name)))
+        # Get the full file name from the partial 'addon_name'
+        addon_name = next((mod for mod in os.listdir(addon_folder) if mod.__contains__(addon_name)))
 
         # Get confirmation from the user before deleting
         confirmation_dialog = QtGui.QMessageBox.question(self, "Confirm Action",
-                                                         "Are you sure you want to delete this mod?",
+                                                         "Are you sure you want to delete this addon?",
                                                          QtGui.QMessageBox.No,
                                                          QtGui.QMessageBox.Yes)
         if confirmation_dialog == QtGui.QMessageBox.Yes:
-            os.remove(mod_folder + mod_name)
+            os.remove(addon_folder + addon_name)
             self.populate_listviews()
-            self.statusbar.showMessage("Mod successfully deleted.")
+            self.statusbar.showMessage("Addon successfully deleted.")
 
 
-    def condense_mod(self, mod_name):
+    def condense_addon(self, addon_name):
         """
         A little helper function to pretty-ify output for the QListView's.
         """
         # The hash length is always 64 chars, so by this we check if one is in the name
-        if len(mod_name) > 64:
-            mod_name = re.findall(".*-", mod_name)[0]
-            return(mod_name[:-1]) # Removes the trailing dash before returning
+        if len(addon_name) > 64:
+            addon_name = re.findall(".*-", addon_name)[0]
+            return(addon_name[:-1]) # Removes the trailing dash before returning
         else:
-            return(mod_name.replace(".wz", ""))
+            return(addon_name.replace(".wz", ""))
 
 
     def populate_listviews(self):
         """
-        Gets a list of map, campaign, and global mods, and populates their
+        Gets a list of map, campaign, and global addons, and populates their
         respective QListView's with them.
         """
         # We need this to elide the text
-        mod_size = QtCore.QSize(50, 15)
+        addon_size = QtCore.QSize(50, 15)
 
         # Clear all existing items
         for model in [self.map_data_model, self.cam_data_model, self.global_data_model]:
@@ -154,18 +154,18 @@ class MainWindow(MoodLoader):
 
         # We need to declare these ahead of time to avoid errors later on when
         # giving the mods their properties and adding them to their models
-        map_mods = []
+        map_addons = []
         cam_mods = []
         global_mods = []
 
         # A key for the list.sort() method to sort the mods naturally
-        natural_sort = lambda mod: (float(re.split("([0-9]+)", mod)[1]))
+        natural_sort = lambda addon: (float(re.split("([0-9]+)", addon)[1]))
 
         # Populate lists with mods
         if os.path.isdir(self.config_dir + "/maps/"):
-            map_mods = [mod for mod in os.listdir(self.config_dir + "/maps/")
+            map_addons = [mod for mod in os.listdir(self.config_dir + "/maps/")
                         if os.path.isfile(self.config_dir + "/maps/" + mod) and mod.__contains__(".wz")]
-            map_mods.sort(key=natural_sort)
+            map_addons.sort(key=natural_sort)
 
         if os.path.isdir(self.config_dir + "/campaign/"):
             cam_mods = [mod for mod in os.listdir(self.config_dir + "/campaign/")
@@ -178,35 +178,35 @@ class MainWindow(MoodLoader):
             global_mods.sort(key=natural_sort)
 
         # Make all mods in these lists QStandardItem's to append to a QListView
-        for mod_list in [map_mods, cam_mods, global_mods]:
-            for mod in mod_list:
-                tooltip = mod
-                mod = QtGui.QStandardItem(self.condense_mod(mod))
-                mod.setSizeHint(mod_size)
-                mod.setToolTip(tooltip)
-                mod.setEditable(False)
+        for addon_list in [map_addons, cam_mods, global_mods]:
+            for addon in addon_list:
+                tooltip = addon
+                addon = QtGui.QStandardItem(self.condense_addon(addon))
+                addon.setSizeHint(addon_size)
+                addon.setToolTip(tooltip)
+                addon.setEditable(False)
 
                 # Append items to their appropriate models
-                if mod_list == map_mods:
-                    self.map_data_model.appendRow(mod)
-                elif mod_list == cam_mods:
-                    self.cam_data_model.appendRow(mod)
-                elif mod_list == global_mods:
-                    self.global_data_model.appendRow(mod)
+                if addon_list == map_addons:
+                    self.map_data_model.appendRow(addon)
+                elif addon_list == cam_mods:
+                    self.cam_data_model.appendRow(addon)
+                elif addon_list == global_mods:
+                    self.global_data_model.appendRow(addon)
 
 
-    def listview_menu(self, mod_type):
+    def listview_menu(self, addon_type):
         """
         Called when a QListView item is right-clicked on, lets the user delete
-        the selected mod.
+        the selected addon.
         """
         # Create the delete action
-        delete_mod_action = QtGui.QAction("Delete Mod", self)
-        delete_mod_action.triggered.connect(lambda: self.delete_mod(mod_type))
+        delete_addon_action = QtGui.QAction("Delete Addon", self)
+        delete_addon_action.triggered.connect(lambda: self.delete_addon(addon_type))
 
         # Create the menu, and display it at the cursor position
         menu = QtGui.QMenu("Options", self)
-        menu.addAction(delete_mod_action)
+        menu.addAction(delete_addon_action)
 
         menu.exec_(QtGui.QCursor.pos())
 
