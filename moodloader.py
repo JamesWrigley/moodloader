@@ -168,14 +168,12 @@ class MainWindow(MoodLoader):
             map_addons.sort(key=natural_sort)
 
         if os.path.isdir(self.config_dir + "/campaign/"):
-            cam_mods = [mod for mod in os.listdir(self.config_dir + "/campaign/")
-                        if os.path.isfile(self.config_dir + "/campaign/" + mod) and mod.__contains__(".wz")]
-            cam_mods.sort(key=natural_sort)
+            cam_mods = sorted([mod for mod in os.listdir(self.config_dir + "/campaign/")
+                        if os.path.isfile(self.config_dir + "/campaign/" + mod) and mod.__contains__(".wz")])
 
         if os.path.isdir(self.config_dir + "/global/"):
-            global_mods = [mod for mod in os.listdir(self.config_dir + "/global/")
-                           if os.path.isfile(self.config_dir + "/global/" + mod) and mod.__contains__(".wz")]
-            global_mods.sort(key=natural_sort)
+            global_mods = sorted([mod for mod in os.listdir(self.config_dir + "/global/")
+                           if os.path.isfile(self.config_dir + "/global/" + mod) and mod.__contains__(".wz")])
 
         # Make all mods in these lists QStandardItem's to append to a QListView
         for addon_list in [map_addons, cam_mods, global_mods]:
