@@ -42,8 +42,8 @@ class MainWindow(MoodLoader):
 
         ### Set up connections ###
         self.install_map_button.clicked.connect(lambda: self.install_addon("/maps/"))
-        self.install_cam_mod_button.clicked.connect(lambda: self.install_addon("/campaign/"))
-        self.install_global_mod_button.clicked.connect(lambda: self.install_addon("/global/"))
+        self.install_cam_mod_button.clicked.connect(lambda: self.install_addon("/mods/campaign/"))
+        self.install_global_mod_button.clicked.connect(lambda: self.install_addon("/mods/global/"))
 
         ### Set up the QListView's
         self.populate_listviews()
@@ -54,9 +54,9 @@ class MainWindow(MoodLoader):
         self.maps_listview.connect(self.maps_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
                                        lambda: self.listview_menu("/maps/"))
         self.cam_mods_listview.connect(self.cam_mods_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
-                                       lambda: self.listview_menu("/campaign/"))
+                                       lambda: self.listview_menu("/mods/campaign/"))
         self.global_mods_listview.connect(self.global_mods_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
-                                          lambda: self.listview_menu("/global/"))
+                                          lambda: self.listview_menu("/mods/global/"))
 
 
     def get_config_path(self):
@@ -109,9 +109,9 @@ class MainWindow(MoodLoader):
 
         if addon_type == "/maps/":
             addon_name = self.maps_listview.currentIndex().data()
-        elif addon_type == "/campaign/":
+        elif addon_type == "/mods/campaign/":
             addon_name = self.cam_mods_listview.currentIndex().data()
-        elif addon_type == "/global/":
+        elif addon_type == "/mods/global/":
             addon_name = self.global_mods_listview.currentIndex().data()
 
         # Get the full file name from the partial 'addon_name'
@@ -167,13 +167,13 @@ class MainWindow(MoodLoader):
                         if os.path.isfile(self.config_dir + "/maps/" + mod) and mod.__contains__(".wz")]
             map_addons.sort(key=natural_sort)
 
-        if os.path.isdir(self.config_dir + "/campaign/"):
-            cam_mods = sorted([mod for mod in os.listdir(self.config_dir + "/campaign/")
-                        if os.path.isfile(self.config_dir + "/campaign/" + mod) and mod.__contains__(".wz")])
+        if os.path.isdir(self.config_dir + "/mods/campaign/"):
+            cam_mods = sorted([mod for mod in os.listdir(self.config_dir + "/mods/campaign/")
+                        if os.path.isfile(self.config_dir + "/mods/campaign/" + mod) and mod.__contains__(".wz")])
 
-        if os.path.isdir(self.config_dir + "/global/"):
-            global_mods = sorted([mod for mod in os.listdir(self.config_dir + "/global/")
-                           if os.path.isfile(self.config_dir + "/global/" + mod) and mod.__contains__(".wz")])
+        if os.path.isdir(self.config_dir + "/mods/global/"):
+            global_mods = sorted([mod for mod in os.listdir(self.config_dir + "/mods/global/")
+                           if os.path.isfile(self.config_dir + "/mods/global/" + mod) and mod.__contains__(".wz")])
 
         # Make all mods in these lists QStandardItem's to append to a QListView
         for addon_list in [map_addons, cam_mods, global_mods]:
