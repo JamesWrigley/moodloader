@@ -142,55 +142,51 @@ class MainWindow(MoodLoader):
 
     def populate_listviews(self):
         """
-        Gets a list of map, campaign, and global addons, and populates their
+        Gets a list of map, campaign, and global mods, and populates their
         respective QListView's with them.
         """
         # We need this to elide the text
         addon_size = QtCore.QSize(50, 15)
-
+        # And this to sort the mods properly (mainly maps)
+        natural_sort = lambda addon: (float(re.split("([0-9]+)", addon)[1]))
+                
         # Clear all existing items
         for model in [self.map_data_model, self.cam_data_model, self.global_data_model]:
             model.clear()
 
-        # We need to declare these ahead of time to avoid errors later on when
-        # giving the mods their properties and adding them to their models
-        map_addons = []
-        cam_mods = []
-        global_mods = []
-
-        # A key for the list.sort() method to sort the mods naturally
-        natural_sort = lambda addon: (float(re.split("([0-9]+)", addon)[1]))
-
-        # Populate lists with mods
         if os.path.isdir(self.config_dir + "/maps/"):
-            map_addons = [mod for mod in os.listdir(self.config_dir + "/maps/")
-                        if os.path.isfile(self.config_dir + "/maps/" + mod) and mod.__contains__(".wz")]
-            map_addons.sort(key=natural_sort)
+            maps = [addon for addon in os.listdir(self.config_dir + "/maps/")
+                        if os.path.isfile(self.config_dir + "/maps/" + addon) and addon.__contains__(".wz")]
+            maps.sort(key=natural_sort)
+
+            for addon in maps:
+                addon_item = QtGui.QStandardItem(self.condense_addon(addon))
+                addon_item.setSizeHint(addon_size)
+                addon_item.setToolTip(addon)
+                addon_item.setEditable(False)
+                self.map_data_model.appendRow(addon_item)
 
         if os.path.isdir(self.config_dir + "/mods/campaign/"):
-            cam_mods = sorted([mod for mod in os.listdir(self.config_dir + "/mods/campaign/")
-                        if os.path.isfile(self.config_dir + "/mods/campaign/" + mod) and mod.__contains__(".wz")])
+            cam_mods = [addon for addon in os.listdir(self.config_dir + "/mods/campaign/")
+                        if os.path.isfile(self.config_dir + "/mods/campaign/" + addon) and addon.__contains__(".wz")]
+
+            for addon in cam_mods:
+                addon_item = QtGui.QStandardItem(self.condense_addon(addon))
+                addon_item.setSizeHint(addon_size)
+                addon_item.setToolTip(addon)
+                addon_item.setEditable(False)
+                self.cam_data_model.appendRow(addon_item)
 
         if os.path.isdir(self.config_dir + "/mods/global/"):
-            global_mods = sorted([mod for mod in os.listdir(self.config_dir + "/mods/global/")
-                           if os.path.isfile(self.config_dir + "/mods/global/" + mod) and mod.__contains__(".wz")])
+            global_mods = [addon for addon in os.listdir(self.config_dir + "/mods/global/")
+                           if os.path.isfile(self.config_dir + "/mods/global/" + addon) and addon.__contains__(".wz")]
 
-        # Make all mods in these lists QStandardItem's to append to a QListView
-        for addon_list in [map_addons, cam_mods, global_mods]:
-            for addon in addon_list:
-                tooltip = addon
-                addon = QtGui.QStandardItem(self.condense_addon(addon))
-                addon.setSizeHint(addon_size)
-                addon.setToolTip(tooltip)
-                addon.setEditable(False)
-
-                # Append items to their appropriate models
-                if addon_list == map_addons:
-                    self.map_data_model.appendRow(addon)
-                elif addon_list == cam_mods:
-                    self.cam_data_model.appendRow(addon)
-                elif addon_list == global_mods:
-                    self.global_data_model.appendRow(addon)
+            for addon in global_mods:
+                addon_item = QtGui.QStandardItem(self.condense_addon(addon))
+                addon_item.setSizeHint(addon_size)
+                addon_item.setToolTip(addon)
+                addon_item.setEditable(False)
+                self.global_data_model.appendRow(addon_item)
 
 
     def listview_menu(self, addon_type):
