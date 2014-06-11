@@ -73,8 +73,6 @@ class MoodLoader(QtGui.QWidget):
         # Map widgets
         self.install_map_button = QtGui.QPushButton("Install Map")
         self.install_map_button.setToolTip(install_mod_tooltip)
-        self.run_map_button = QtGui.QPushButton("Run Map")
-        self.run_map_button.setToolTip(run_mod_tooltip)
         maps_gbox = QtGui.QGroupBox("Maps")
         maps_gbox.setStyleSheet(mods_stylesheet)
         maps_gbox.setLayout(maps_vbox)
@@ -82,8 +80,6 @@ class MoodLoader(QtGui.QWidget):
         # Campaign mod widgets
         self.install_cam_mod_button = QtGui.QPushButton("Install Campaign Mod")
         self.install_cam_mod_button.setToolTip(install_mod_tooltip)
-        run_cam_mod_button = QtGui.QPushButton("Run Campaign Mod")
-        run_cam_mod_button.setToolTip(run_mod_tooltip)
         cam_mod_gbox = QtGui.QGroupBox("Campaign Mods")
         cam_mod_gbox.setStyleSheet(mods_stylesheet)
         cam_mod_gbox.setLayout(cam_mods_vbox)
@@ -91,8 +87,6 @@ class MoodLoader(QtGui.QWidget):
         # Global mod widgets
         self.install_global_mod_button = QtGui.QPushButton("Install Global Mod")
         self.install_global_mod_button.setToolTip(install_mod_tooltip)
-        run_global_mod_button = QtGui.QPushButton("Run Global Mod")
-        run_global_mod_button.setToolTip(run_mod_tooltip)
         global_mod_gbox = QtGui.QGroupBox("Global Mods")
         global_mod_gbox.setStyleSheet(mods_stylesheet)
         global_mod_gbox.setLayout(global_mods_vbox)
@@ -143,17 +137,14 @@ class MoodLoader(QtGui.QWidget):
         # Pack mod buttons into their vbox's
         maps_vbox.insertSpacing(0, 10)
         maps_vbox.addWidget(self.install_map_button)
-        maps_vbox.addWidget(self.run_map_button)
         maps_vbox.addWidget(self.maps_listview)
 
         cam_mods_vbox.insertSpacing(0, 10)
         cam_mods_vbox.addWidget(self.install_cam_mod_button)
-        cam_mods_vbox.addWidget(run_cam_mod_button)
         cam_mods_vbox.addWidget(self.cam_mods_listview)
         
         global_mods_vbox.insertSpacing(0, 10)
         global_mods_vbox.addWidget(self.install_global_mod_button)
-        global_mods_vbox.addWidget(run_global_mod_button)
         global_mods_vbox.addWidget(self.global_mods_listview)
 
         # Pack game options radio buttons, note the deplorable 'addStretch()'s

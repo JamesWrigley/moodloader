@@ -22,6 +22,7 @@ import re
 import os
 import sys
 import shutil
+import subprocess
 from PyQt4 import QtGui, QtCore
 from moodloader_ui import MoodLoader
 
@@ -35,6 +36,7 @@ class MainWindow(MoodLoader):
         ### Create some system variables ###
         self.config_dir = self.get_config_path()
         self.open_dialog_dir = os.path.expanduser("~")
+        self.wz_binary = shutil.which("warzone2100")
 
 
         super(MoodLoader, self).__init__()
@@ -189,19 +191,44 @@ class MainWindow(MoodLoader):
                 self.global_data_model.appendRow(addon_item)
 
 
+    def run_addon(self, wz_flag):
+        """
+        As the self-explanatory name implies, this runs the selected mod.
+        """
+        if wz_flag == " --mod_ca=":
+            addon = self.config_dir + "/mods/campaign/" + self.cam_mods_listview.currentIndex().data(role=3)
+            print(addon)
+        elif wz_flag == " --mod=":
+            addon = self.config_dir + "/mods/global/" + self.global_mods_listview.currentIndex.data(role=3)
+
+        subprocess.call(self.wz_binary + wz_flag + addon)
+
     def listview_menu(self, addon_type):
         """
         Called when a QListView item is right-clicked on, lets the user delete
         the selected addon.
         """
-        # Create the delete action
+        # Create the menu
+        menu = QtGui.QMenu("Options", self)
+
+        # Create actions
         delete_addon_action = QtGui.QAction("Delete Addon", self)
         delete_addon_action.triggered.connect(lambda: self.delete_addon(addon_type))
 
-        # Create the menu, and display it at the cursor position
-        menu = QtGui.QMenu("Options", self)
+        if addon_type == "/mods/campaign/":
+            wz_flag = " --mod_ca="
+            run_cam_addon_action = QtGui.QAction("Run Addon", self)
+            run_cam_addon_action.triggered.connect(lambda: self.run_addon(wz_flag))
+            menu.addAction(run_cam_addon_action)
+        elif addon_type == "/mods/global/":
+            wz_flag = " --mod="
+            run_global_addon_action = QtGui.QAction("Run Addon", self)
+            run_global_addon_action.triggered.connect(lambda: self.run_addon(wz_flag))
+            menu.addAction(run_global_addon_action)
+
         menu.addAction(delete_addon_action)
 
+        # Display menu the cursor position
         menu.exec_(QtGui.QCursor.pos())
 
 
