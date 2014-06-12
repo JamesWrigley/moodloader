@@ -33,14 +33,13 @@ class MainWindow(MoodLoader):
     """
 
     def __init__(self):
+        super(MoodLoader, self).__init__()
+        self.initUI()
+
         ### Create some system variables ###
         self.config_dir = self.get_config_path()
         self.open_dialog_dir = os.path.expanduser("~")
-        self.wz_binary = shutil.which("warzone2100")
-
-
-        super(MoodLoader, self).__init__()
-        self.initUI()
+        self.wz_binary = self.get_binary_path(False)
 
         ### Set up connections ###
         self.install_map_button.clicked.connect(lambda: self.install_addon("/maps/"))
@@ -75,6 +74,34 @@ class MainWindow(MoodLoader):
         else:
             self.statusbar.showMessage("No config folder found.")
             return("")
+
+
+    def get_binary_path(self, assign):
+        """
+        Get the path of the WZ binary. The 'assign' boolean specifies whether we
+        assign 'binary_path' to an existing 'self.wz_binary' variable or just return it.
+        The 'assign' field should always be True when called after the program starts
+        since the 'self.wz_binary' field is already existent.
+        """
+        binary_path = shutil.which("warzone2100")
+
+        # If 'shutil.which()' can't find the binary, then we prompt the user for it
+        if binary_path == "":
+            confirmation_dialog = QtGui.QMessageBox.question(self, "Missing Path",
+                                                             "Moodloader cannot find the path of your WZ binary, would you like to set it now?",
+                                                             QtGui.QMessageBox.No,
+                                                             QtGui.QMessageBox.Yes)
+            if confirmation_dialog == QtGui.QMessageBox.Yes:
+                binary_path = QtGui.QFileDialog.getOpenFileName(self, "Select Binary",
+                                                                os.path.expanduser("~"))
+            else:
+                warning_dialog = QtGui.QMessageBox.warning(self, "Warning",
+                                                           "You will not be able to run addons from Moodloader until you set the binary path!")
+
+        if assign:
+            self.wz_binary = binary_path
+        elif not assign:
+            return(binary_path)
 
 
     def install_addon(self, addon_type):
@@ -193,6 +220,7 @@ class MainWindow(MoodLoader):
         As the self-explanatory name implies, this runs the selected mod.
         Note that we use 'subprocess.Popen' so as not to block the GUI.
         """
+        addon = ""
 
         # Retrieve the tooltip (which is the filename) from the active item
         if wz_flag == " --mod_ca=":
@@ -201,6 +229,7 @@ class MainWindow(MoodLoader):
             addon = self.global_mods_listview.currentIndex().data(role=3)
 
         subprocess.Popen(self.wz_binary + wz_flag + addon, shell=True)
+
 
     def listview_menu(self, addon_type):
         """
@@ -215,15 +244,23 @@ class MainWindow(MoodLoader):
         delete_addon_action.triggered.connect(lambda: self.delete_addon(addon_type))
         menu.addAction(delete_addon_action)
 
+        # We only add the run options for mods, not maps
         if addon_type != "/maps/":
-            run_addon_action = QtGui.QAction("Run Addon", self)
-            run_addon_action.triggered.connect(lambda: self.run_addon(wz_flag))
-            menu.addAction(run_addon_action)
+            # We only go into the first branch if 'self.wz_binary' is empty
+            if self.wz_binary == "":
+                get_binary_path_action = QtGui.QAction("Choose Binary", self)
+                get_binary_path_action.triggered.connect(lambda: self.get_binary_path(True))
+                menu.addAction(get_binary_path_action)
+            else:
+                wz_flag = ""
+                if addon_type == "/mods/campaign/":
+                    wz_flag = " --mod_ca="
+                elif addon_type == "/mods/global/":
+                    wz_flag = " --mod="
 
-            if addon_type == "/mods/campaign/":
-                wz_flag = " --mod_ca="
-            elif addon_type == "/mods/global/":
-                wz_flag = " --mod="
+                run_addon_action = QtGui.QAction("Run Addon", self)
+                run_addon_action.triggered.connect(lambda: self.run_addon(wz_flag))
+                menu.addAction(run_addon_action)
 
         # Display menu the cursor position
         menu.exec_(QtGui.QCursor.pos())
