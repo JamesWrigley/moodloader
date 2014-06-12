@@ -80,7 +80,7 @@ class MainWindow(MoodLoader):
     def install_addon(self, addon_type):
         """
         Install a map to the /.warzone2100-xx/maps folder.
-        Note that even the name of the argument is 'addon_type', it's actually
+        Note that even though the name of the argument is 'addon_type', it's actually
         the folder name the map is to be installed into (i.e. '/maps/' for a map).
         """
         addon_path = QtGui.QFileDialog.getOpenFileName(self, "Select Addon", self.open_dialog_dir, "WZ Addons (*.wz);; All files (*.*)")
@@ -110,14 +110,11 @@ class MainWindow(MoodLoader):
         addon_folder = self.config_dir + addon_type
 
         if addon_type == "/maps/":
-            addon_name = self.maps_listview.currentIndex().data()
+            addon_name = self.maps_listview.currentIndex().data(role=3)
         elif addon_type == "/mods/campaign/":
-            addon_name = self.cam_mods_listview.currentIndex().data()
+            addon_name = self.cam_mods_listview.currentIndex().data(role=3)
         elif addon_type == "/mods/global/":
-            addon_name = self.global_mods_listview.currentIndex().data()
-
-        # Get the full file name from the partial 'addon_name'
-        addon_name = next((mod for mod in os.listdir(addon_folder) if mod.__contains__(addon_name)))
+            addon_name = self.global_mods_listview.currentIndex().data(role=3)
 
         # Get confirmation from the user before deleting
         confirmation_dialog = QtGui.QMessageBox.question(self, "Confirm Action",
@@ -194,14 +191,16 @@ class MainWindow(MoodLoader):
     def run_addon(self, wz_flag):
         """
         As the self-explanatory name implies, this runs the selected mod.
+        Note that we use 'subprocess.Popen' so as not to block the GUI.
         """
-        if wz_flag == " --mod_ca=":
-            addon = self.config_dir + "/mods/campaign/" + self.cam_mods_listview.currentIndex().data(role=3)
-            print(addon)
-        elif wz_flag == " --mod=":
-            addon = self.config_dir + "/mods/global/" + self.global_mods_listview.currentIndex.data(role=3)
 
-        subprocess.call(self.wz_binary + wz_flag + addon)
+        # Retrieve the tooltip (which is the filename) from the active item
+        if wz_flag == " --mod_ca=":
+            addon = self.cam_mods_listview.currentIndex().data(role=3)
+        elif wz_flag == " --mod=":
+            addon = self.global_mods_listview.currentIndex().data(role=3)
+
+        subprocess.Popen(self.wz_binary + wz_flag + addon, shell=True)
 
     def listview_menu(self, addon_type):
         """
@@ -214,19 +213,17 @@ class MainWindow(MoodLoader):
         # Create actions
         delete_addon_action = QtGui.QAction("Delete Addon", self)
         delete_addon_action.triggered.connect(lambda: self.delete_addon(addon_type))
-
-        if addon_type == "/mods/campaign/":
-            wz_flag = " --mod_ca="
-            run_cam_addon_action = QtGui.QAction("Run Addon", self)
-            run_cam_addon_action.triggered.connect(lambda: self.run_addon(wz_flag))
-            menu.addAction(run_cam_addon_action)
-        elif addon_type == "/mods/global/":
-            wz_flag = " --mod="
-            run_global_addon_action = QtGui.QAction("Run Addon", self)
-            run_global_addon_action.triggered.connect(lambda: self.run_addon(wz_flag))
-            menu.addAction(run_global_addon_action)
-
         menu.addAction(delete_addon_action)
+
+        if addon_type != "/maps/":
+            run_addon_action = QtGui.QAction("Run Addon", self)
+            run_addon_action.triggered.connect(lambda: self.run_addon(wz_flag))
+            menu.addAction(run_addon_action)
+
+            if addon_type == "/mods/campaign/":
+                wz_flag = " --mod_ca="
+            elif addon_type == "/mods/global/":
+                wz_flag = " --mod="
 
         # Display menu the cursor position
         menu.exec_(QtGui.QCursor.pos())
