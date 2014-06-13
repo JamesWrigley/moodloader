@@ -86,7 +86,7 @@ class MainWindow(MoodLoader):
         binary_path = shutil.which("warzone2100")
 
         # If 'shutil.which()' can't find the binary, then we prompt the user for it
-        if binary_path == "":
+        if binary_path == None:
             confirmation_dialog = QtGui.QMessageBox.question(self, "Missing Path",
                                                              "Moodloader cannot find the path of your WZ binary, would you like to set it now?",
                                                              QtGui.QMessageBox.No,
@@ -154,6 +154,22 @@ class MainWindow(MoodLoader):
             self.statusbar.showMessage("Addon successfully deleted.")
 
 
+    def run_addon(self, wz_flag):
+        """
+        As the self-explanatory name implies, this runs the selected mod.
+        Note that we use 'subprocess.Popen' so as not to block the GUI.
+        """
+        addon = ""
+
+        # Retrieve the tooltip (which is the filename) from the active item
+        if wz_flag == " --mod_ca=":
+            addon = self.cam_mods_listview.currentIndex().data(role=3)
+        elif wz_flag == " --mod=":
+            addon = self.global_mods_listview.currentIndex().data(role=3)
+
+        subprocess.Popen(self.wz_binary + wz_flag + addon, shell=True)
+
+
     def condense_addon(self, addon_name):
         """
         A little helper function to pretty-ify output for the QListView's.
@@ -213,22 +229,6 @@ class MainWindow(MoodLoader):
                 addon_item.setToolTip(addon)
                 addon_item.setEditable(False)
                 self.global_data_model.appendRow(addon_item)
-
-
-    def run_addon(self, wz_flag):
-        """
-        As the self-explanatory name implies, this runs the selected mod.
-        Note that we use 'subprocess.Popen' so as not to block the GUI.
-        """
-        addon = ""
-
-        # Retrieve the tooltip (which is the filename) from the active item
-        if wz_flag == " --mod_ca=":
-            addon = self.cam_mods_listview.currentIndex().data(role=3)
-        elif wz_flag == " --mod=":
-            addon = self.global_mods_listview.currentIndex().data(role=3)
-
-        subprocess.Popen(self.wz_binary + wz_flag + addon, shell=True)
 
 
     def listview_menu(self, addon_type):
