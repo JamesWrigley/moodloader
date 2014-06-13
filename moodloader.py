@@ -51,13 +51,22 @@ class MainWindow(MoodLoader):
         for listview in [self.maps_listview, self.cam_mods_listview, self.global_mods_listview]:
             listview.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
-        # Connect each QListView to send its addon type to 'self.listview()'
-        self.maps_listview.connect(self.maps_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
-                                       lambda: self.listview_menu("/maps/"))
-        self.cam_mods_listview.connect(self.cam_mods_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
-                                       lambda: self.listview_menu("/mods/campaign/"))
-        self.global_mods_listview.connect(self.global_mods_listview, QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
-                                          lambda: self.listview_menu("/mods/global/"))
+        ### Connect each QListView to send its addon type to 'self.listview()'
+
+        # Some helper lambda's
+        check_if_global_item = lambda point: self.global_mods_listview.indexAt(point).isValid()
+        check_if_cam_item = lambda point: self.cam_mods_listview.indexAt(point).isValid()
+        check_if_maps_item = lambda point: self.maps_listview.indexAt(point).isValid()
+
+        self.maps_listview.customContextMenuRequested.connect(lambda point:
+                                                              self.listview_menu("/maps/")
+                                                              if check_if_maps_item(point) else None)
+        self.cam_mods_listview.customContextMenuRequested.connect(lambda point:
+                                                                  self.listview_menu("/mods/campaign/")
+                                                                  if check_if_cam_item(point) else None)
+        self.global_mods_listview.customContextMenuRequested.connect(lambda point:
+                                                                     self.listview_menu("/mods/global/")
+                                                                     if check_if_global_item(point) else None)
 
 
     def get_config_path(self):
@@ -88,15 +97,12 @@ class MainWindow(MoodLoader):
         # If 'shutil.which()' can't find the binary, then we prompt the user for it
         if binary_path == None:
             confirmation_dialog = QtGui.QMessageBox.question(self, "Missing Path",
-                                                             "Moodloader cannot find the path of your WZ binary, would you like to set it now?",
+                                                             "Moodloader cannot find the path of your WZ binary, would you like to set it now? If you don't you will not be able to run addons from Moodloader.",
                                                              QtGui.QMessageBox.No,
                                                              QtGui.QMessageBox.Yes)
             if confirmation_dialog == QtGui.QMessageBox.Yes:
                 binary_path = QtGui.QFileDialog.getOpenFileName(self, "Select Binary",
                                                                 os.path.expanduser("~"))
-            else:
-                warning_dialog = QtGui.QMessageBox.warning(self, "Warning",
-                                                           "You will not be able to run addons from Moodloader until you set the binary path!")
 
         if assign:
             self.wz_binary = binary_path
@@ -247,7 +253,7 @@ class MainWindow(MoodLoader):
         # We only add the run options for mods, not maps
         if addon_type != "/maps/":
             # We only go into the first branch if 'self.wz_binary' is empty
-            if self.wz_binary == "":
+            if self.wz_binary == None:
                 get_binary_path_action = QtGui.QAction("Choose Binary", self)
                 get_binary_path_action.triggered.connect(lambda: self.get_binary_path(True))
                 menu.addAction(get_binary_path_action)
