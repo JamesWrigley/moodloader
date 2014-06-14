@@ -101,7 +101,7 @@ class MainWindow(MoodLoader):
             binary_path = config_file.readline()
             config_file.close()
         else:
-            binary_path = None #shutil.which("warzone2100")
+            binary_path = shutil.which("warzone2100")
 
             # If 'shutil.which()' can't find the binary, then we prompt the user for it
             if binary_path == None:
