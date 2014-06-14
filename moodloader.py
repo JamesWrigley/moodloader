@@ -91,18 +91,31 @@ class MainWindow(MoodLoader):
         assign 'binary_path' to an existing 'self.wz_binary' variable or just return it.
         The 'assign' field should always be True when called after the program starts
         since the 'self.wz_binary' field is already existent.
+        If a config file exists, we read from that, else we write the 'binary_path' to
+        a new one if the user chooses a binary.
         """
-        binary_path = shutil.which("warzone2100")
+        config_file = os.path.expanduser("~") + "/.moodloader"
 
-        # If 'shutil.which()' can't find the binary, then we prompt the user for it
-        if binary_path == None:
-            confirmation_dialog = QtGui.QMessageBox.question(self, "Missing Path",
-                                                             "Moodloader cannot find the path of your WZ binary, would you like to set it now? If you don't you will not be able to run addons from Moodloader.",
-                                                             QtGui.QMessageBox.No,
-                                                             QtGui.QMessageBox.Yes)
-            if confirmation_dialog == QtGui.QMessageBox.Yes:
-                binary_path = QtGui.QFileDialog.getOpenFileName(self, "Select Binary",
-                                                                os.path.expanduser("~"))
+        if os.path.isfile(config_file) and os.path.getsize(config_file) > 0:
+            config_file = open(config_file)
+            binary_path = config_file.readline()
+            config_file.close()
+        else:
+            binary_path = None #shutil.which("warzone2100")
+
+            # If 'shutil.which()' can't find the binary, then we prompt the user for it
+            if binary_path == None:
+                confirmation_dialog = QtGui.QMessageBox.question(self, "Missing Path",
+                                                                 "Moodloader cannot find the path of Warzone, would you like to set it manually? If you don't you will not be able to run addons from Moodloader.",
+                                                                 QtGui.QMessageBox.No,
+                                                                 QtGui.QMessageBox.Yes)
+                if confirmation_dialog == QtGui.QMessageBox.Yes:
+                    binary_path = QtGui.QFileDialog.getOpenFileName(self, "Select Binary",
+                                                                    os.path.expanduser("~"))
+                    # Write the users settings to 'config_file'
+                    config_file = open(config_file, "w")
+                    config_file.write(binary_path)
+                    config_file.close()
 
         if assign:
             self.wz_binary = binary_path
