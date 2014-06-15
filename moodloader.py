@@ -45,18 +45,20 @@ class MainWindow(MoodLoader):
         self.install_map_button.clicked.connect(lambda: self.install_addon("/maps/"))
         self.install_cam_mod_button.clicked.connect(lambda: self.install_addon("/mods/campaign/"))
         self.install_global_mod_button.clicked.connect(lambda: self.install_addon("/mods/global/"))
+        self.install_multiplayer_mod_button.clicked.connect(lambda: self.install_addon("/mods/multiplay"))
 
         ### Set up the QListView's
         self.populate_listviews()
-        for listview in [self.maps_listview, self.cam_mods_listview, self.global_mods_listview]:
+        for listview in [self.maps_listview, self.cam_mods_listview, self.global_mods_listview, self.multiplayer_mods_listview]:
             listview.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
         ### Connect each QListView to send its addon type to 'self.listview()'
 
         # Some helper lambda's
+        check_if_maps_item = lambda point: self.maps_listview.indexAt(point).isValid()
         check_if_global_item = lambda point: self.global_mods_listview.indexAt(point).isValid()
         check_if_cam_item = lambda point: self.cam_mods_listview.indexAt(point).isValid()
-        check_if_maps_item = lambda point: self.maps_listview.indexAt(point).isValid()
+        check_if_multiplay_item = lambda point: self.multiplayer_mods_listview.indexAt(point).isValid()
 
         self.maps_listview.customContextMenuRequested.connect(lambda point:
                                                               self.listview_menu("/maps/")
@@ -67,6 +69,9 @@ class MainWindow(MoodLoader):
         self.global_mods_listview.customContextMenuRequested.connect(lambda point:
                                                                      self.listview_menu("/mods/global/")
                                                                      if check_if_global_item(point) else None)
+        self.multiplayer_mods_listview.customContextMenuRequested.connect(lambda point:
+                                                                          self.listview_menu("/mods/multiplay/")
+                                                                          if check_if_multiplay_item(point) else None)
 
 
     def get_config_path(self):
@@ -154,6 +159,7 @@ class MainWindow(MoodLoader):
         selected addon.
         """
         addon_folder = self.config_dir + addon_type
+        addon_name = ""
 
         if addon_type == "/maps/":
             addon_name = self.maps_listview.currentIndex().data(role=3)
@@ -161,6 +167,8 @@ class MainWindow(MoodLoader):
             addon_name = self.cam_mods_listview.currentIndex().data(role=3)
         elif addon_type == "/mods/global/":
             addon_name = self.global_mods_listview.currentIndex().data(role=3)
+        elif addon_type == "/mods/multiplay/":
+            addon_name = self.multiplayer_mods_listview.currentIndex().data(role=3)
 
         # Get confirmation from the user before deleting
         confirmation_dialog = QtGui.QMessageBox.question(self, "Confirm Action",
@@ -178,15 +186,17 @@ class MainWindow(MoodLoader):
         As the self-explanatory name implies, this runs the selected mod.
         Note that we use 'subprocess.Popen' so as not to block the GUI.
         """
-        addon = ""
+        args = [self.wz_binary]
 
         # Retrieve the tooltip (which is the filename) from the active item
-        if wz_flag == " --mod_ca=":
-            addon = self.cam_mods_listview.currentIndex().data(role=3)
-        elif wz_flag == " --mod=":
-            addon = self.global_mods_listview.currentIndex().data(role=3)
+        if wz_flag == "--mod_ca=":
+            args.append("--mod_ca=%s" % self.cam_mods_listview.currentIndex().data(role=3))
+        elif wz_flag == "--mod=":
+            args.append("--mod=%s" % self.global_mods_listview.currentIndex().data(role=3))
+        elif wz_flag == "--mod_mp=":
+            args.append("--mod_mp=%s" % self.multiplayer_mods_listview.currentIndex().data(role=3))
 
-        subprocess.Popen(self.wz_binary + wz_flag + addon, shell=True)
+        subprocess.Popen(args)
 
 
     def condense_addon(self, addon_name):
@@ -212,7 +222,7 @@ class MainWindow(MoodLoader):
         natural_sort = lambda addon: (float(re.split("([0-9]+)", addon)[1]))
                 
         # Clear all existing items
-        for model in [self.map_data_model, self.cam_data_model, self.global_data_model]:
+        for model in [self.map_data_model, self.cam_data_model, self.global_data_model, self.multiplayer_data_model]:
             model.clear()
 
         if os.path.isdir(self.config_dir + "/maps/"):
@@ -249,6 +259,17 @@ class MainWindow(MoodLoader):
                 addon_item.setEditable(False)
                 self.global_data_model.appendRow(addon_item)
 
+        if os.path.isdir(self.config_dir + "/mods/multiplay/"):
+            multiplayer_mods = [addon for addon in os.listdir(self.config_dir + "/mods/multiplay/")
+                           if os.path.isfile(self.config_dir + "/mods/multiplay/" + addon) and addon.__contains__(".wz")]
+
+            for addon in multiplayer_mods:
+                addon_item = QtGui.QStandardItem(self.condense_addon(addon))
+                addon_item.setSizeHint(addon_size)
+                addon_item.setToolTip(addon)
+                addon_item.setEditable(False)
+                self.multiplayer_data_model.appendRow(addon_item)
+
 
     def listview_menu(self, addon_type):
         """
@@ -273,9 +294,11 @@ class MainWindow(MoodLoader):
             else:
                 wz_flag = ""
                 if addon_type == "/mods/campaign/":
-                    wz_flag = " --mod_ca="
+                    wz_flag = "--mod_ca="
                 elif addon_type == "/mods/global/":
-                    wz_flag = " --mod="
+                    wz_flag = "--mod="
+                elif addon_type == "/mods/multiplay/":
+                    wz_flag = "--mod_mp="
 
                 run_addon_action = QtGui.QAction("Run Addon", self)
                 run_addon_action.triggered.connect(lambda: self.run_addon(wz_flag))
