@@ -39,18 +39,19 @@ class MoodLoader(QtGui.QWidget):
     def initUI(self):
         ### Make all the layouts ###
         main_vbox = QtGui.QVBoxLayout()
-        mods_hbox = QtGui.QHBoxLayout()
+        addons_hbox = QtGui.QHBoxLayout()
 
         maps_vbox = QtGui.QVBoxLayout()
         cam_mods_vbox = QtGui.QVBoxLayout()
         global_mods_vbox = QtGui.QVBoxLayout()
+        multiplayer_mods_vbox = QtGui.QVBoxLayout()
 
         game_options_vbox = QtGui.QVBoxLayout()
         game_options_hbox = QtGui.QHBoxLayout()
 
 
-        ### Stylesheet for the mods QGroupBox's ###
-        mods_stylesheet = "QGroupBox {border: 2px solid gray; font-family: Inconsolata; font-size: 21px; margin-top: .5em;} QGroupBox::title {subcontrol-origin: margin; subcontrol-position: top center; padding:0 10px;}"
+        ### Stylesheet for the addons QGroupBox's ###
+        addons_stylesheet = "QGroupBox {border: 2px solid gray; font-family: Inconsolata; font-size: 21px; margin-top: .5em;} QGroupBox::title {subcontrol-origin: margin; subcontrol-position: top center; padding:0 10px;}"
 
 
         ### Make status bar ###
@@ -59,8 +60,7 @@ class MoodLoader(QtGui.QWidget):
 
 
         ### Generic button tooltips ###
-        install_mod_tooltip = "Install a mod permanently"
-        run_mod_tooltip = "Run a mod in a WZ session (will not install it)"
+        install_addon_tooltip = "Install a mod permanently"
 
 
         ### Make all the widgets ###
@@ -72,27 +72,34 @@ class MoodLoader(QtGui.QWidget):
 
         # Map widgets
         self.install_map_button = QtGui.QPushButton("Install Map")
-        self.install_map_button.setToolTip(install_mod_tooltip)
+        self.install_map_button.setToolTip(install_addon_tooltip)
         maps_gbox = QtGui.QGroupBox("Maps")
-        maps_gbox.setStyleSheet(mods_stylesheet)
+        maps_gbox.setStyleSheet(addons_stylesheet)
         maps_gbox.setLayout(maps_vbox)
 
         # Campaign mod widgets
         self.install_cam_mod_button = QtGui.QPushButton("Install Campaign Mod")
-        self.install_cam_mod_button.setToolTip(install_mod_tooltip)
-        cam_mod_gbox = QtGui.QGroupBox("Campaign Mods")
-        cam_mod_gbox.setStyleSheet(mods_stylesheet)
-        cam_mod_gbox.setLayout(cam_mods_vbox)
+        self.install_cam_mod_button.setToolTip(install_addon_tooltip)
+        cam_mods_gbox = QtGui.QGroupBox("Campaign Mods")
+        cam_mods_gbox.setStyleSheet(addons_stylesheet)
+        cam_mods_gbox.setLayout(cam_mods_vbox)
 
         # Global mod widgets
         self.install_global_mod_button = QtGui.QPushButton("Install Global Mod")
-        self.install_global_mod_button.setToolTip(install_mod_tooltip)
-        global_mod_gbox = QtGui.QGroupBox("Global Mods")
-        global_mod_gbox.setStyleSheet(mods_stylesheet)
-        global_mod_gbox.setLayout(global_mods_vbox)
+        self.install_global_mod_button.setToolTip(install_addon_tooltip)
+        global_mods_gbox = QtGui.QGroupBox("Global Mods")
+        global_mods_gbox.setStyleSheet(addons_stylesheet)
+        global_mods_gbox.setLayout(global_mods_vbox)
+
+        # Multiplayer mod widgets
+        self.install_multiplayer_mod_button = QtGui.QPushButton("Install Multiplayer Mod")
+        self.install_multiplayer_mod_button.setToolTip(install_addon_tooltip)
+        multiplayer_mods_gbox = QtGui.QGroupBox("Multiplayer Mods")
+        multiplayer_mods_gbox.setStyleSheet(addons_stylesheet)
+        multiplayer_mods_gbox.setLayout(multiplayer_mods_vbox)
 
 
-        ### QListViews to display existing mods ###
+        ### QListViews to display existing addons ###
         self.maps_listview = QtGui.QListView()
         self.map_data_model = QtGui.QStandardItemModel(self.maps_listview)
         self.maps_listview.setModel(self.map_data_model)
@@ -107,6 +114,11 @@ class MoodLoader(QtGui.QWidget):
         self.global_data_model = QtGui.QStandardItemModel(self.global_mods_listview)
         self.global_mods_listview.setModel(self.global_data_model)
         self.global_mods_listview.setTextElideMode(2)
+
+        self.multiplayer_mods_listview = QtGui.QListView()
+        self.multiplayer_data_model = QtGui.QStandardItemModel(self.multiplayer_mods_listview)
+        self.multiplayer_mods_listview.setModel(self.multiplayer_data_model)
+        self.multiplayer_mods_listview.setTextElideMode(2)
 
         # Game options widgets
         fullscreen_rb = QtGui.QRadioButton("Fullscreen")
@@ -128,7 +140,7 @@ class MoodLoader(QtGui.QWidget):
         shaders_button_group.addButton(shaders_off_rb)
 
         game_options_gbox = QtGui.QGroupBox("Game Options")
-        game_options_gbox.setStyleSheet(mods_stylesheet)
+        game_options_gbox.setStyleSheet(addons_stylesheet)
         game_options_gbox.setLayout(game_options_hbox)
 
 
@@ -147,7 +159,11 @@ class MoodLoader(QtGui.QWidget):
         global_mods_vbox.addWidget(self.install_global_mod_button)
         global_mods_vbox.addWidget(self.global_mods_listview)
 
-        # Pack game options radio buttons, note the deplorable 'addStretch()'s
+        multiplayer_mods_vbox.insertSpacing(0, 10)
+        multiplayer_mods_vbox.addWidget(self.install_multiplayer_mod_button)
+        multiplayer_mods_vbox.addWidget(self.multiplayer_mods_listview)
+
+        # Pack game options radio buttons
         game_options_hbox.addWidget(fullscreen_rb)
         game_options_hbox.addWidget(windowed_rb)
         game_options_hbox.addStretch()
@@ -159,14 +175,15 @@ class MoodLoader(QtGui.QWidget):
         game_options_hbox.addWidget(shaders_on_rb)
         game_options_hbox.addWidget(shaders_off_rb)
 
-        # Pack group boxes into the main 'mods_hbox'
-        mods_hbox.addWidget(maps_gbox)
-        mods_hbox.addWidget(cam_mod_gbox)
-        mods_hbox.addWidget(global_mod_gbox)
+        # Pack group boxes into the main 'addons_hbox'
+        addons_hbox.addWidget(maps_gbox)
+        addons_hbox.addWidget(cam_mods_gbox)
+        addons_hbox.addWidget(global_mods_gbox)
+        addons_hbox.addWidget(multiplayer_mods_gbox)
 
         # Pack everything into 'main_vbox'
         main_vbox.addWidget(header_image_label)
-        main_vbox.addLayout(mods_hbox)
+        main_vbox.addLayout(addons_hbox)
         main_vbox.addStretch()
         main_vbox.addWidget(game_options_gbox)
         main_vbox.addWidget(self.statusbar)
