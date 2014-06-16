@@ -190,11 +190,14 @@ class MainWindow(MoodLoader):
 
         # Retrieve the tooltip (which is the filename) from the active item
         if wz_flag == "--mod_ca=":
-            args.append("--mod_ca=%s" % self.cam_mods_listview.currentIndex().data(role=3))
+            selected_mods = [mod.data(role=3) for mod in self.cam_mods_listview.selectedIndexes()]
+            for mod in selected_mods: args.append("--mod_ca=%s" % mod)
         elif wz_flag == "--mod=":
-            args.append("--mod=%s" % self.global_mods_listview.currentIndex().data(role=3))
+            selected_mods = [mod.data(role=3) for mod in self.global_mods_listview.selectedIndexes()]
+            for mod in selected_mods: args.append("--mod=%s" % mod)
         elif wz_flag == "--mod_mp=":
-            args.append("--mod_mp=%s" % self.multiplayer_mods_listview.currentIndex().data(role=3))
+            selected_mods = [mod.data(role=3) for mod in self.multiplayer_mods_listview.selectedIndexes()]
+            for mod in selected: args.append("--mod_mp=%s" % mod)
 
         subprocess.Popen(args)
 
@@ -280,7 +283,7 @@ class MainWindow(MoodLoader):
         menu = QtGui.QMenu("Options", self)
 
         # Create actions
-        delete_addon_action = QtGui.QAction("Delete Addon", self)
+        delete_addon_action = QtGui.QAction("Delete addon", self)
         delete_addon_action.triggered.connect(lambda: self.delete_addon(addon_type))
         menu.addAction(delete_addon_action)
 
@@ -300,7 +303,7 @@ class MainWindow(MoodLoader):
                 elif addon_type == "/mods/multiplay/":
                     wz_flag = "--mod_mp="
 
-                run_addon_action = QtGui.QAction("Run Addon", self)
+                run_addon_action = QtGui.QAction("Run selected addons", self)
                 run_addon_action.triggered.connect(lambda: self.run_addon(wz_flag))
                 menu.addAction(run_addon_action)
 

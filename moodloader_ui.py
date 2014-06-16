@@ -104,21 +104,25 @@ class MoodLoader(QtGui.QWidget):
         self.map_data_model = QtGui.QStandardItemModel(self.maps_listview)
         self.maps_listview.setModel(self.map_data_model)
         self.maps_listview.setTextElideMode(2)
+        self.maps_listview.setSelectionMode(3)
 
         self.cam_mods_listview = QtGui.QListView()
         self.cam_data_model = QtGui.QStandardItemModel(self.cam_mods_listview)
         self.cam_mods_listview.setModel(self.cam_data_model)
         self.cam_mods_listview.setTextElideMode(2)
+        self.cam_mods_listview.setSelectionMode(3)
 
         self.global_mods_listview = QtGui.QListView()
         self.global_data_model = QtGui.QStandardItemModel(self.global_mods_listview)
         self.global_mods_listview.setModel(self.global_data_model)
         self.global_mods_listview.setTextElideMode(2)
+        self.global_mods_listview.setSelectionMode(3)
 
         self.multiplayer_mods_listview = QtGui.QListView()
         self.multiplayer_data_model = QtGui.QStandardItemModel(self.multiplayer_mods_listview)
         self.multiplayer_mods_listview.setModel(self.multiplayer_data_model)
         self.multiplayer_mods_listview.setTextElideMode(2)
+        self.multiplayer_mods_listview.setSelectionMode(3)
 
         # Game options widgets
         fullscreen_rb = QtGui.QRadioButton("Fullscreen")
