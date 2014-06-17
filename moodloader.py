@@ -130,7 +130,7 @@ class MainWindow(MoodLoader):
 
     def install_addon(self, addon_type):
         """
-        Install a map to the /.warzone2100-xx/maps folder.
+        Install an addon to the appropriate folder.
         Note that even though the name of the argument is 'addon_type', it's actually
         the folder name the map is to be installed into (i.e. '/maps/' for a map).
         """
@@ -138,7 +138,7 @@ class MainWindow(MoodLoader):
         addon_install_path  = self.config_dir + addon_type
         addon_name = os.path.basename(addon_path)
 
-        # Check that all cases are covered before installing
+        # Check that all prerequisites are covered before installing
         if not addon_path:
             return
         elif not os.path.isdir(addon_install_path):
@@ -155,12 +155,13 @@ class MainWindow(MoodLoader):
 
     def delete_addons(self, addon_type):
         """
-        As abundantly clear from the name, this method deletes the currently
-        selected addon.
+        As abundantly clear from the name, this method deletes all the currently
+        selected addons.
         """
         addon_folder = self.config_dir + addon_type
         selected_addons = []
 
+        # Populate 'selected_addons' with the users selection
         if addon_type == "/maps/":
             selected_addons = [addon.data(role=3) for addon in self.maps_listview.selectedIndexes()]
         elif addon_type == "/mods/campaign/":
@@ -177,7 +178,7 @@ class MainWindow(MoodLoader):
         else:
             dialog_string = "Are you sure you want to delete these addons?"
             statusbar_message = "Addons successfully deleted."
-        confirmation_dialog = QtGui.QMessageBox.question(self, "Confirm Action",
+        confirmation_dialog = QtGui.QMessageBox.question(self, "Confirm Delete",
                                                          dialog_string,
                                                          QtGui.QMessageBox.No,
                                                          QtGui.QMessageBox.Yes)
@@ -189,12 +190,12 @@ class MainWindow(MoodLoader):
 
     def run_addons(self, wz_flag):
         """
-        As the self-explanatory name implies, this runs the selected mod.
+        As the self-explanatory name implies, this runs all selected addons.
         Note that we use 'subprocess.Popen' so as not to block the GUI.
         """
         args = [self.wz_binary]
 
-        # Retrieve the tooltip (which is the filename) from the active item
+        # Retrieve the tooltips (which are the filenames) from the selected items
         if wz_flag == "--mod_ca=":
             selected_addons = [mod.data(role=3) for mod in self.cam_mods_listview.selectedIndexes()]
             for mod in selected_addons: args.append("--mod_ca=%s" % mod)
@@ -222,8 +223,8 @@ class MainWindow(MoodLoader):
 
     def populate_listviews(self):
         """
-        Gets a list of map, campaign, and global mods, and populates their
-        respective QListView's with them.
+        Gets a list of all installed addons and populates their respective
+        QListView's with them.
         """
         # We need this to elide the text
         addon_size = QtCore.QSize(50, 15)
@@ -282,8 +283,8 @@ class MainWindow(MoodLoader):
 
     def listview_menu(self, addon_type):
         """
-        Called when a QListView item is right-clicked on, lets the user delete
-        the selected addon.
+        Called when a QListView item is right-clicked on, shows the user
+        available operations to perform on the addon.
         """
         # Create the menu
         menu = QtGui.QMenu("Options", self)
@@ -313,7 +314,7 @@ class MainWindow(MoodLoader):
                 run_addons_action.triggered.connect(lambda: self.run_addons(wz_flag))
                 menu.addAction(run_addons_action)
 
-        # Display menu the cursor position
+        # Display menu at the cursor position
         menu.exec_(QtGui.QCursor.pos())
 
 
