@@ -59,10 +59,6 @@ class MoodLoader(QtGui.QWidget):
         self.statusbar.showMessage("Ready")
 
 
-        ### Generic button tooltips ###
-        install_addon_tooltip = "Install a mod permanently"
-
-
         ### Make all the widgets ###
 
         # Header image is randomly chosen, 'choice()' is from the random module
@@ -72,28 +68,24 @@ class MoodLoader(QtGui.QWidget):
 
         # Map widgets
         self.install_map_button = QtGui.QPushButton("Install Map")
-        self.install_map_button.setToolTip(install_addon_tooltip)
         maps_gbox = QtGui.QGroupBox("Maps")
         maps_gbox.setStyleSheet(addons_stylesheet)
         maps_gbox.setLayout(maps_vbox)
 
         # Campaign mod widgets
         self.install_cam_mod_button = QtGui.QPushButton("Install Campaign Mod")
-        self.install_cam_mod_button.setToolTip(install_addon_tooltip)
         cam_mods_gbox = QtGui.QGroupBox("Campaign Mods")
         cam_mods_gbox.setStyleSheet(addons_stylesheet)
         cam_mods_gbox.setLayout(cam_mods_vbox)
 
         # Global mod widgets
         self.install_global_mod_button = QtGui.QPushButton("Install Global Mod")
-        self.install_global_mod_button.setToolTip(install_addon_tooltip)
         global_mods_gbox = QtGui.QGroupBox("Global Mods")
         global_mods_gbox.setStyleSheet(addons_stylesheet)
         global_mods_gbox.setLayout(global_mods_vbox)
 
         # Multiplayer mod widgets
         self.install_multiplayer_mod_button = QtGui.QPushButton("Install Multiplayer Mod")
-        self.install_multiplayer_mod_button.setToolTip(install_addon_tooltip)
         multiplayer_mods_gbox = QtGui.QGroupBox("Multiplayer Mods")
         multiplayer_mods_gbox.setStyleSheet(addons_stylesheet)
         multiplayer_mods_gbox.setLayout(multiplayer_mods_vbox)

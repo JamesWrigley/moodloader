@@ -45,7 +45,7 @@ class MainWindow(MoodLoader):
         self.install_map_button.clicked.connect(lambda: self.install_addon("/maps/"))
         self.install_cam_mod_button.clicked.connect(lambda: self.install_addon("/mods/campaign/"))
         self.install_global_mod_button.clicked.connect(lambda: self.install_addon("/mods/global/"))
-        self.install_multiplayer_mod_button.clicked.connect(lambda: self.install_addon("/mods/multiplay"))
+        self.install_multiplayer_mod_button.clicked.connect(lambda: self.install_addon("/mods/multiplay/"))
 
         ### Set up the QListView's
         self.populate_listviews()
@@ -142,7 +142,7 @@ class MainWindow(MoodLoader):
         if not addon_path:
             return
         elif not os.path.isdir(addon_install_path):
-            os.mkdir(addon_install_path)
+            os.makedirs(addon_install_path)
         elif os.path.isfile(addon_install_path + addon_name):
             self.statusbar.showMessage("Addon already installed.")
             return
@@ -153,35 +153,41 @@ class MainWindow(MoodLoader):
         self.open_dialog_dir = os.path.dirname(addon_path) # Note that we reset 'self.open_dialog_dir' to the last used folder
 
 
-    def delete_addon(self, addon_type):
+    def delete_addons(self, addon_type):
         """
         As abundantly clear from the name, this method deletes the currently
         selected addon.
         """
         addon_folder = self.config_dir + addon_type
-        addon_name = ""
+        selected_addons = []
 
         if addon_type == "/maps/":
-            addon_name = self.maps_listview.currentIndex().data(role=3)
+            selected_addons = [addon.data(role=3) for addon in self.maps_listview.selectedIndexes()]
         elif addon_type == "/mods/campaign/":
-            addon_name = self.cam_mods_listview.currentIndex().data(role=3)
+            selected_addons = [addon.data(role=3) for addon in self.cam_mods_listview.selectedIndexes()]
         elif addon_type == "/mods/global/":
-            addon_name = self.global_mods_listview.currentIndex().data(role=3)
+            selected_addons = [addon.data(role=3) for addon in self.global_mods_listview.selectedIndexes()]
         elif addon_type == "/mods/multiplay/":
-            addon_name = self.multiplayer_mods_listview.currentIndex().data(role=3)
+            selected_addons = [addon.data(role=3) for addon in self.multiplayer_mods_listview.selectedIndexes()]
 
-        # Get confirmation from the user before deleting
+        # Make accurate messages to display, and get confirmation from the user before deleting
+        if len(selected_addons) == 1:
+            dialog_string = "Are you sure you want to delete this addon?"
+            statusbar_message = "Addon successfully deleted."
+        else:
+            dialog_string = "Are you sure you want to delete these addons?"
+            statusbar_message = "Addons successfully deleted."
         confirmation_dialog = QtGui.QMessageBox.question(self, "Confirm Action",
-                                                         "Are you sure you want to delete this addon?",
+                                                         dialog_string,
                                                          QtGui.QMessageBox.No,
                                                          QtGui.QMessageBox.Yes)
         if confirmation_dialog == QtGui.QMessageBox.Yes:
-            os.remove(addon_folder + addon_name)
+            for addon in selected_addons: os.remove(addon_folder + addon)
             self.populate_listviews()
-            self.statusbar.showMessage("Addon successfully deleted.")
+            self.statusbar.showMessage(statusbar_message)
 
 
-    def run_addon(self, wz_flag):
+    def run_addons(self, wz_flag):
         """
         As the self-explanatory name implies, this runs the selected mod.
         Note that we use 'subprocess.Popen' so as not to block the GUI.
@@ -190,13 +196,13 @@ class MainWindow(MoodLoader):
 
         # Retrieve the tooltip (which is the filename) from the active item
         if wz_flag == "--mod_ca=":
-            selected_mods = [mod.data(role=3) for mod in self.cam_mods_listview.selectedIndexes()]
-            for mod in selected_mods: args.append("--mod_ca=%s" % mod)
+            selected_addons = [mod.data(role=3) for mod in self.cam_mods_listview.selectedIndexes()]
+            for mod in selected_addons: args.append("--mod_ca=%s" % mod)
         elif wz_flag == "--mod=":
-            selected_mods = [mod.data(role=3) for mod in self.global_mods_listview.selectedIndexes()]
-            for mod in selected_mods: args.append("--mod=%s" % mod)
+            selected_addons = [mod.data(role=3) for mod in self.global_mods_listview.selectedIndexes()]
+            for mod in selected_addons: args.append("--mod=%s" % mod)
         elif wz_flag == "--mod_mp=":
-            selected_mods = [mod.data(role=3) for mod in self.multiplayer_mods_listview.selectedIndexes()]
+            selected_addons = [mod.data(role=3) for mod in self.multiplayer_mods_listview.selectedIndexes()]
             for mod in selected: args.append("--mod_mp=%s" % mod)
 
         subprocess.Popen(args)
@@ -283,9 +289,9 @@ class MainWindow(MoodLoader):
         menu = QtGui.QMenu("Options", self)
 
         # Create actions
-        delete_addon_action = QtGui.QAction("Delete addon", self)
-        delete_addon_action.triggered.connect(lambda: self.delete_addon(addon_type))
-        menu.addAction(delete_addon_action)
+        delete_addons_action = QtGui.QAction("Delete addon(s)", self)
+        delete_addons_action.triggered.connect(lambda: self.delete_addons(addon_type))
+        menu.addAction(delete_addons_action)
 
         # We only add the run options for mods, not maps
         if addon_type != "/maps/":
@@ -303,9 +309,9 @@ class MainWindow(MoodLoader):
                 elif addon_type == "/mods/multiplay/":
                     wz_flag = "--mod_mp="
 
-                run_addon_action = QtGui.QAction("Run selected addons", self)
-                run_addon_action.triggered.connect(lambda: self.run_addon(wz_flag))
-                menu.addAction(run_addon_action)
+                run_addons_action = QtGui.QAction("Run selected addons", self)
+                run_addons_action.triggered.connect(lambda: self.run_addons(wz_flag))
+                menu.addAction(run_addons_action)
 
         # Display menu the cursor position
         menu.exec_(QtGui.QCursor.pos())
