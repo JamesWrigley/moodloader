@@ -39,6 +39,7 @@ class MoodLoader(QtGui.QWidget):
     def initUI(self):
         ### Make all the layouts ###
         main_vbox = QtGui.QVBoxLayout()
+        header_image_hbox = QtGui.QHBoxLayout()
         addons_hbox = QtGui.QHBoxLayout()
 
         maps_vbox = QtGui.QVBoxLayout()
@@ -51,7 +52,7 @@ class MoodLoader(QtGui.QWidget):
 
 
         ### Stylesheet for the addons QGroupBox's ###
-        addons_stylesheet = "QGroupBox {border: 2px solid gray; font-family: Inconsolata; font-size: 21px; margin-top: .5em;} QGroupBox::title {subcontrol-origin: margin; subcontrol-position: top center; padding:0 10px;}"
+        addons_stylesheet = "QGroupBox {border: 2px solid gray; font-family: Inconsolata; font-size: 21px; margin-top: .5em;} QGroupBox::title {subcontrol-origin: margin; subcontrol-position: top center; padding:0px 5px;}"
 
 
         ### Make status bar ###
@@ -177,8 +178,13 @@ class MoodLoader(QtGui.QWidget):
         addons_hbox.addWidget(global_mods_gbox)
         addons_hbox.addWidget(multiplayer_mods_gbox)
 
+        # Pack the header image
+        header_image_hbox.addStretch()
+        header_image_hbox.addWidget(header_image_label)
+        header_image_hbox.addStretch()
+
         # Pack everything into 'main_vbox'
-        main_vbox.addWidget(header_image_label)
+        main_vbox.addLayout(header_image_hbox)
         main_vbox.addLayout(addons_hbox)
         main_vbox.addStretch()
         main_vbox.addWidget(game_options_gbox)
@@ -187,6 +193,6 @@ class MoodLoader(QtGui.QWidget):
 
         self.setLayout(main_vbox)
         self.setWindowTitle("Warzone 2100 Mood Loader")
-        self.resize(800, 600)
+        self.resize(1050, 600)
         self.center()
         self.show()
