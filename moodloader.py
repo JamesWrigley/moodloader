@@ -22,6 +22,7 @@ import re
 import os
 import sys
 import shutil
+import zipfile
 import subprocess
 from PyQt4 import QtGui, QtCore
 from moodloader_ui import MoodLoader
@@ -221,6 +222,28 @@ class MainWindow(MoodLoader):
             return(addon_name.replace(".wz", ""))
 
 
+    def check_addon(self, addon_path):
+        """
+        Checks the addon for validity.
+        The 'addon_path' argument is the file path of the addon.
+        """
+        forbidden_files = ['Thumbs.db', 'Desktop.ini', '.DS_Store']
+        forbidden_extensions = ['.bak', '.tmp', '.wz', '.zip', '.js', '.png']
+        required_extensions = ['.gam', '.bjo', '.map', '.ttp', '.lev']
+
+        with zipfile.ZipFile(addon_path) as addon:
+            addon_files = addon.namelist()
+            addon_file_extensions = [os.path.splitext(path)[1] for path in addon_files]
+
+        # Make sure all cases are covered
+        if all(ext in addon_file_extensions for ext in required_extensions) and not \
+           any(ext in addon_file_extensions for ext in forbidden_extensions) and not \
+           any(illegal in addon_files for illegal in forbidden_files):
+            return True
+        else:
+            return False
+
+
     def populate_listviews(self):
         """
         Gets a list of all installed addons and populates their respective
@@ -230,14 +253,19 @@ class MainWindow(MoodLoader):
         addon_size = QtCore.QSize(50, 15)
         # And this to sort the mods properly (mainly maps)
         natural_sort = lambda addon: (float(re.split("([0-9]+)", addon)[1]))
+        # Lessens code duplication later on
+        maps_dir = self.config_dir + "/maps/"
+        cam_mods_dir = self.config_dir + "/mods/campaign/"
+        global_mods_dir = self.config_dir + "/mods/global/"
+        multiplayer_mods_dir = self.config_dir + "/mods/multiplay/"
                 
         # Clear all existing items
         for model in [self.map_data_model, self.cam_data_model, self.global_data_model, self.multiplayer_data_model]:
             model.clear()
 
-        if os.path.isdir(self.config_dir + "/maps/"):
-            maps = [addon for addon in os.listdir(self.config_dir + "/maps/")
-                        if os.path.isfile(self.config_dir + "/maps/" + addon) and addon.__contains__(".wz")]
+        if os.path.isdir(maps_dir):
+            maps = [addon for addon in os.listdir(maps_dir)
+                        if os.path.isfile(maps_dir + addon) and addon.__contains__(".wz")]
             maps.sort(key=natural_sort)
 
             for addon in maps:
@@ -245,11 +273,12 @@ class MainWindow(MoodLoader):
                 addon_item.setSizeHint(addon_size)
                 addon_item.setToolTip(addon)
                 addon_item.setEditable(False)
+                if not self.check_addon(maps_dir + addon): addon_item.setForeground(QtCore.Qt.red)
                 self.map_data_model.appendRow(addon_item)
 
-        if os.path.isdir(self.config_dir + "/mods/campaign/"):
-            cam_mods = [addon for addon in os.listdir(self.config_dir + "/mods/campaign/")
-                        if os.path.isfile(self.config_dir + "/mods/campaign/" + addon) and addon.__contains__(".wz")]
+        if os.path.isdir(cam_mods_dir):
+            cam_mods = [addon for addon in os.listdir(cam_mods_dir)
+                        if os.path.isfile(cam_mods_dir + addon) and addon.__contains__(".wz")]
 
             for addon in cam_mods:
                 addon_item = QtGui.QStandardItem(self.condense_addon(addon))
@@ -258,9 +287,9 @@ class MainWindow(MoodLoader):
                 addon_item.setEditable(False)
                 self.cam_data_model.appendRow(addon_item)
 
-        if os.path.isdir(self.config_dir + "/mods/global/"):
-            global_mods = [addon for addon in os.listdir(self.config_dir + "/mods/global/")
-                           if os.path.isfile(self.config_dir + "/mods/global/" + addon) and addon.__contains__(".wz")]
+        if os.path.isdir(global_mods_dir):
+            global_mods = [addon for addon in os.listdir(global_mods_dir)
+                           if os.path.isfile(global_mods_dir + addon) and addon.__contains__(".wz")]
 
             for addon in global_mods:
                 addon_item = QtGui.QStandardItem(self.condense_addon(addon))
@@ -269,9 +298,9 @@ class MainWindow(MoodLoader):
                 addon_item.setEditable(False)
                 self.global_data_model.appendRow(addon_item)
 
-        if os.path.isdir(self.config_dir + "/mods/multiplay/"):
-            multiplayer_mods = [addon for addon in os.listdir(self.config_dir + "/mods/multiplay/")
-                           if os.path.isfile(self.config_dir + "/mods/multiplay/" + addon) and addon.__contains__(".wz")]
+        if os.path.isdir(multiplayer_mods_dir):
+            multiplayer_mods = [addon for addon in os.listdir(multiplayer_mods_dir)
+                           if os.path.isfile(multiplayer_mods_dir + addon) and addon.__contains__(".wz")]
 
             for addon in multiplayer_mods:
                 addon_item = QtGui.QStandardItem(self.condense_addon(addon))
