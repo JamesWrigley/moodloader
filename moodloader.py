@@ -225,7 +225,6 @@ class MainWindow(MoodLoader):
     def check_addon(self, addon_path):
         """
         Checks the addon for validity.
-        The 'addon_path' argument is the file path of the addon.
         """
         forbidden_files = ['Thumbs.db', 'Desktop.ini', '.DS_Store']
         forbidden_extensions = ['.bak', '.tmp', '.wz', '.zip', '.js', '.png']
