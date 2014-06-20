@@ -243,13 +243,29 @@ class MainWindow(MoodLoader):
             return False
 
 
+    def create_addon(self, addon, addon_type):
+        """
+        A helper function to create items for the QListView's. Note that 'addon_type'
+        is actually the containing directory of the addon.
+        """
+        addon_size = QtCore.QSize(50, 15)
+
+        addon_item = QtGui.QStandardItem(self.condense_addon(addon))
+        addon_item.setSizeHint(addon_size)
+        addon_item.setToolTip(addon)
+        addon_item.setEditable(False)
+        if addon_type == self.config_dir + "/maps/":
+            if not self.check_addon(addon_type + addon):
+                addon_item.setForeground(QtCore.Qt.red)
+
+        return addon_item
+
+
     def populate_listviews(self):
         """
         Gets a list of all installed addons and populates their respective
         QListView's with them.
         """
-        # We need this to elide the text
-        addon_size = QtCore.QSize(50, 15)
         # And this to sort the mods properly (mainly maps)
         natural_sort = lambda addon: (float(re.split("([0-9]+)", addon)[1]))
         # Lessens code duplication later on
@@ -262,51 +278,24 @@ class MainWindow(MoodLoader):
         for model in [self.map_data_model, self.cam_data_model, self.global_data_model, self.multiplayer_data_model]:
             model.clear()
 
-        if os.path.isdir(maps_dir):
-            maps = [addon for addon in os.listdir(maps_dir)
-                        if os.path.isfile(maps_dir + addon) and addon.__contains__(".wz")]
-            maps.sort(key=natural_sort)
+        for directory in [maps_dir, cam_mods_dir, global_mods_dir, multiplayer_mods_dir]:
+            if os.path.isdir(directory):
+                if directory == maps_dir:
+                    data_model = self.map_data_model
+                elif directory == cam_mods_dir:
+                    data_model = self.cam_data_model
+                elif directory == global_mods_dir:
+                    data_model = self.global_data_model
+                else:
+                    data_model = self.multiplayer_data_model
 
-            for addon in maps:
-                addon_item = QtGui.QStandardItem(self.condense_addon(addon))
-                addon_item.setSizeHint(addon_size)
-                addon_item.setToolTip(addon)
-                addon_item.setEditable(False)
-                if not self.check_addon(maps_dir + addon): addon_item.setForeground(QtCore.Qt.red)
-                self.map_data_model.appendRow(addon_item)
+            addon_list = [addon for addon in os.listdir(directory)
+                          if os.path.isfile(directory + addon) and addon.__contains__(".wz")]
+            if directory == maps_dir: addon_list.sort(key=natural_sort) # We only sort maps
 
-        if os.path.isdir(cam_mods_dir):
-            cam_mods = [addon for addon in os.listdir(cam_mods_dir)
-                        if os.path.isfile(cam_mods_dir + addon) and addon.__contains__(".wz")]
-
-            for addon in cam_mods:
-                addon_item = QtGui.QStandardItem(self.condense_addon(addon))
-                addon_item.setSizeHint(addon_size)
-                addon_item.setToolTip(addon)
-                addon_item.setEditable(False)
-                self.cam_data_model.appendRow(addon_item)
-
-        if os.path.isdir(global_mods_dir):
-            global_mods = [addon for addon in os.listdir(global_mods_dir)
-                           if os.path.isfile(global_mods_dir + addon) and addon.__contains__(".wz")]
-
-            for addon in global_mods:
-                addon_item = QtGui.QStandardItem(self.condense_addon(addon))
-                addon_item.setSizeHint(addon_size)
-                addon_item.setToolTip(addon)
-                addon_item.setEditable(False)
-                self.global_data_model.appendRow(addon_item)
-
-        if os.path.isdir(multiplayer_mods_dir):
-            multiplayer_mods = [addon for addon in os.listdir(multiplayer_mods_dir)
-                           if os.path.isfile(multiplayer_mods_dir + addon) and addon.__contains__(".wz")]
-
-            for addon in multiplayer_mods:
-                addon_item = QtGui.QStandardItem(self.condense_addon(addon))
-                addon_item.setSizeHint(addon_size)
-                addon_item.setToolTip(addon)
-                addon_item.setEditable(False)
-                self.multiplayer_data_model.appendRow(addon_item)
+            for addon in addon_list:
+                addon_item = self.create_addon(addon, directory)
+                data_model.appendRow(addon_item)
 
 
     def listview_menu(self, addon_type):
