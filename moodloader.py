@@ -289,13 +289,13 @@ class MainWindow(MoodLoader):
                 else:
                     data_model = self.multiplayer_data_model
 
-            addon_list = [addon for addon in os.listdir(directory)
-                          if os.path.isfile(directory + addon) and addon.__contains__(".wz")]
-            if directory == maps_dir: addon_list.sort(key=natural_sort) # We only sort maps
+                addon_list = [addon for addon in os.listdir(directory)
+                              if os.path.isfile(directory + addon) and addon.__contains__(".wz")]
+                if directory == maps_dir: addon_list.sort(key=natural_sort) # We only sort maps
 
-            for addon in addon_list:
-                addon_item = self.create_addon(addon, directory)
-                data_model.appendRow(addon_item)
+                for addon in addon_list:
+                    addon_item = self.create_addon(addon, directory)
+                    data_model.appendRow(addon_item)
 
 
     def listview_menu(self, addon_type):
