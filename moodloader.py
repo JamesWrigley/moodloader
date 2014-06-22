@@ -248,10 +248,8 @@ class MainWindow(MoodLoader):
         Gets a list of all installed addons and populates their respective
         QListView's with them.
         """
-        addon_size = QtCore.QSize(50, 15)
-        # And this to sort the mods properly (mainly maps)
-        natural_sort = lambda addon: (float(re.split("([0-9]+)", addon)[1]))
-        # Lessens code duplication later on
+        addon_size = QtCore.QSize(50, 15) # We need this to elide the text
+        natural_sort = lambda addon: (float(re.split("([0-9]+)", addon)[1])) # A key to sort the maps properly
         maps_dir = self.config_dir + "/maps/"
         cam_mods_dir = self.config_dir + "/mods/campaign/"
         global_mods_dir = self.config_dir + "/mods/global/"
