@@ -191,7 +191,7 @@ class MainWindow(MoodLoader):
 
     def run_addons(self, wz_flag):
         """
-        As the self-explanatory name implies, this runs all selected addons.
+        As the implies, this runs all selected addons.
         Note that we use 'subprocess.Popen' so as not to block the GUI.
         """
         args = [self.wz_binary]

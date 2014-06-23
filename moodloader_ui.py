@@ -47,9 +47,6 @@ class MoodLoader(QtGui.QWidget):
         global_mods_vbox = QtGui.QVBoxLayout()
         multiplayer_mods_vbox = QtGui.QVBoxLayout()
 
-        game_options_vbox = QtGui.QVBoxLayout()
-        game_options_hbox = QtGui.QHBoxLayout()
-
 
         ### Stylesheet for the addons QGroupBox's ###
         addons_stylesheet = "QGroupBox {border: 2px solid gray; font-family: Inconsolata; font-size: 21px; margin-top: .5em;} QGroupBox::title {subcontrol-origin: margin; subcontrol-position: top center; padding:0px 5px;}"
@@ -117,29 +114,6 @@ class MoodLoader(QtGui.QWidget):
         self.multiplayer_mods_listview.setTextElideMode(2)
         self.multiplayer_mods_listview.setSelectionMode(3)
 
-        # Game options widgets
-        fullscreen_rb = QtGui.QRadioButton("Fullscreen")
-        windowed_rb = QtGui.QRadioButton("Windowed")
-        shadows_on_rb = QtGui.QRadioButton("Shadows On")
-        shadows_off_rb = QtGui.QRadioButton("Shadows Off")
-        shaders_on_rb = QtGui.QRadioButton("Shaders On")
-        shaders_off_rb = QtGui.QRadioButton("Shaders Off")
-
-        windowing_button_group = QtGui.QButtonGroup(game_options_hbox)
-        shadows_button_group = QtGui.QButtonGroup(game_options_hbox)
-        shaders_button_group = QtGui.QButtonGroup(game_options_hbox)
-
-        windowing_button_group.addButton(fullscreen_rb)
-        windowing_button_group.addButton(windowed_rb)
-        shadows_button_group.addButton(shadows_on_rb)
-        shadows_button_group.addButton(shadows_off_rb)
-        shaders_button_group.addButton(shaders_on_rb)
-        shaders_button_group.addButton(shaders_off_rb)
-
-        game_options_gbox = QtGui.QGroupBox("Game Options")
-        game_options_gbox.setStyleSheet(addons_stylesheet)
-        game_options_gbox.setLayout(game_options_hbox)
-
 
         ### Pack everything ###
 
@@ -160,18 +134,6 @@ class MoodLoader(QtGui.QWidget):
         multiplayer_mods_vbox.addWidget(self.install_multiplayer_mod_button)
         multiplayer_mods_vbox.addWidget(self.multiplayer_mods_listview)
 
-        # Pack game options radio buttons
-        game_options_hbox.addWidget(fullscreen_rb)
-        game_options_hbox.addWidget(windowed_rb)
-        game_options_hbox.addStretch()
-
-        game_options_hbox.addWidget(shadows_on_rb)
-        game_options_hbox.addWidget(shadows_off_rb)
-        game_options_hbox.addStretch()
-
-        game_options_hbox.addWidget(shaders_on_rb)
-        game_options_hbox.addWidget(shaders_off_rb)
-
         # Pack group boxes into the main 'addons_hbox'
         addons_hbox.addWidget(maps_gbox)
         addons_hbox.addWidget(cam_mods_gbox)
@@ -186,13 +148,11 @@ class MoodLoader(QtGui.QWidget):
         # Pack everything into 'main_vbox'
         main_vbox.addLayout(header_image_hbox)
         main_vbox.addLayout(addons_hbox)
-        main_vbox.addStretch()
-        main_vbox.addWidget(game_options_gbox)
         main_vbox.addWidget(self.statusbar)
 
 
         self.setLayout(main_vbox)
         self.setWindowTitle("Warzone 2100 Mood Loader")
-        self.resize(1050, 600)
+        self.resize(1050, 500)
         self.center()
         self.show()
