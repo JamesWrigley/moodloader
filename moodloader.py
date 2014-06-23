@@ -143,7 +143,12 @@ class MainWindow(MoodLoader):
         if not addon_path:
             return
         elif not os.path.isdir(addon_install_path):
-            os.makedirs(addon_install_path)
+            # Show a warning dialog if Moodloader is underpriveleged
+            try:
+                os.makedirs(addon_install_path)
+            except PermissionError as error:
+                QtGui.QMessageBox.warning(self, "Error", str(error))
+                return
         elif os.path.isfile(addon_install_path + addon_name):
             self.statusbar.showMessage("Addon already installed.")
             return
