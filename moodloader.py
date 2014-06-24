@@ -164,12 +164,15 @@ class MainWindow(MoodLoader):
         As abundantly clear from the name, this method deletes all the currently
         selected addons.
         """
+        # 'get_file_name' gets the actual map name from the tooltip passed to it,
+        # it's meant to work on the tooltips of map-mods, which are HTML formatted
+        get_file_name = lambda addon: re.search("[0-9](\S+?).wz", addon).group()
         addon_folder = self.config_dir + addon_type
         selected_addons = []
 
         # Populate 'selected_addons' with the users selection
         if addon_type == "/maps/":
-            selected_addons = [addon.data(role=3) for addon in self.maps_listview.selectedIndexes()]
+            selected_addons = [get_file_name(addon.data(role=3)) for addon in self.maps_listview.selectedIndexes()]
         elif addon_type == "/mods/campaign/":
             selected_addons = [addon.data(role=3) for addon in self.cam_mods_listview.selectedIndexes()]
         elif addon_type == "/mods/global/":
@@ -279,14 +282,16 @@ class MainWindow(MoodLoader):
                               if os.path.isfile(directory + addon) and addon.__contains__(".wz")]
                 if directory == maps_dir: addon_list.sort(key=natural_sort) # We only sort maps
 
+                # Create the items to append to each QListView
                 for addon in addon_list:
                     addon_item = QtGui.QStandardItem(self.condense_addon(addon))
                     addon_item.setSizeHint(addon_size)
                     addon_item.setToolTip(addon)
                     addon_item.setEditable(False)
-                    if directory == maps_dir:
-                        if not self.check_addon(directory + addon):
-                            addon_item.setForeground(QtCore.Qt.red)
+                    # Mark all map-mods
+                    if directory == maps_dir and not self.check_addon(directory + addon):
+                        addon_item.setForeground(QtCore.Qt.red)
+                        addon_item.setToolTip("<p align=center style=white-space:pre>%s <br>This is a map-mod.</p>" % addon)
 
                     data_model.appendRow(addon_item)
 
