@@ -17,7 +17,6 @@
 # ################################################################################
 
 
-from random import choice
 from PyQt4 import QtGui
 
 class MoodLoader(QtGui.QWidget):
@@ -59,8 +58,8 @@ class MoodLoader(QtGui.QWidget):
 
         ### Make all the widgets ###
 
-        # Header image is randomly chosen, 'choice()' is from the random module
-        header_image = QtGui.QPixmap("addons-header-bg"+ choice(str(123)) + ".gif")
+        # Make the header image
+        header_image = QtGui.QPixmap("header.png")
         header_image_label = QtGui.QLabel()
         header_image_label.setPixmap(header_image)
 
@@ -154,5 +153,6 @@ class MoodLoader(QtGui.QWidget):
         self.setLayout(main_vbox)
         self.setWindowTitle("Warzone 2100 Mood Loader")
         self.resize(1050, 500)
+        self.setFixedWidth(1050)
         self.center()
         self.show()
