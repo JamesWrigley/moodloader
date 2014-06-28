@@ -16,7 +16,8 @@
 #                                                                                #
 # ################################################################################
 
-
+import os
+import re
 from PyQt4 import QtGui
 
 class MoodLoader(QtGui.QWidget):
@@ -156,3 +157,52 @@ class MoodLoader(QtGui.QWidget):
         self.setFixedWidth(1050)
         self.center()
         self.show()
+
+
+class PropertiesDialog(QtGui.QDialog):
+    """
+    This is the class that creates the properties dialog for an addon. We just
+    subclass a QDialog and work from there. To call it, just run something like,
+    'PropertiesDialog("/path/to/addon/").
+    """
+    def __init__(self, addon_path):
+        super(PropertiesDialog, self).__init__()
+        self.addon_path = addon_path
+        self.initUI()
+
+
+    def condense_addon(self, addon_name):
+        """
+        A little helper function to pretty-ify output for the QListView's.
+        """
+        # The hash length is always 64 chars, so by this we check if one is in the name
+        if len(addon_name) > 64:
+            addon_name = re.findall(".*-", addon_name)[0]
+            return(addon_name[:-1]) # Removes the trailing dash before returning
+        else:
+            return(addon_name.replace(".wz", ""))
+
+
+    def initUI(self):
+        ### Make all the layouts ###
+        main_vbox = QtGui.QVBoxLayout()
+        main_label_hbox = QtGui.QHBoxLayout()
+
+        ### Label widgets ###
+        main_label = QtGui.QLabel(self.condense_addon(os.path.basename(self.addon_path)))
+        main_label.setFont(QtGui.QFont("Liberation Mono", 20))
+
+        ### Pack everything ###
+
+        # Pack the main label
+        main_label_hbox.addStretch()
+        main_label_hbox.addWidget(main_label)
+        main_label_hbox.addStretch()
+
+        # Pack it all into main_vbox
+        main_vbox.addLayout(main_label_hbox)
+        main_vbox.addStretch()
+
+        self.setLayout(main_vbox)
+        self.resize(420, 350)
+        self.exec_()

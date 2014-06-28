@@ -25,7 +25,7 @@ import shutil
 import zipfile
 import subprocess
 from PyQt4 import QtGui, QtCore
-from moodloader_ui import MoodLoader
+from moodloader_ui import MoodLoader, PropertiesDialog
 
 class MainWindow(MoodLoader):
     """
@@ -301,6 +301,19 @@ class MainWindow(MoodLoader):
         Called when a QListView item is right-clicked on, shows the user
         available operations to perform on the addon.
         """
+        # Set up some variables for later. 'wz_flag' is a 'run_addons() argument,
+        # and 'addon_path' is the absolute addon path of the currently active addon.
+        wz_flag = ""
+        if addon_type == "/maps/":
+            addon_path = self.config_dir + addon_type + self.maps_listview.currentIndex().data(role=3)
+        elif addon_type == "/mods/campaign/":
+            wz_flag = "--mod_ca="
+        elif addon_type == "/mods/global/":
+            wz_flag = "--mod="
+        elif addon_type == "/mods/multiplay/":
+            wz_flag = "--mod_mp="
+
+
         # Create the menu
         menu = QtGui.QMenu("Options", self)
 
@@ -317,17 +330,14 @@ class MainWindow(MoodLoader):
                 get_binary_path_action.triggered.connect(lambda: self.get_binary_path(True))
                 menu.addAction(get_binary_path_action)
             else:
-                wz_flag = ""
-                if addon_type == "/mods/campaign/":
-                    wz_flag = "--mod_ca="
-                elif addon_type == "/mods/global/":
-                    wz_flag = "--mod="
-                elif addon_type == "/mods/multiplay/":
-                    wz_flag = "--mod_mp="
-
                 run_addons_action = QtGui.QAction("Run selected addons", self)
                 run_addons_action.triggered.connect(lambda: self.run_addons(wz_flag))
                 menu.addAction(run_addons_action)
+
+        # Create option for the properties dialog
+        properties_dialog_action = QtGui.QAction("Properties", self)
+        properties_dialog_action.triggered.connect(lambda: PropertiesDialog(addon_path))
+        menu.addAction(properties_dialog_action)
 
         # Display menu at the cursor position
         menu.exec_(QtGui.QCursor.pos())
