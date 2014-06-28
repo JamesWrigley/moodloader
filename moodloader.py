@@ -303,15 +303,18 @@ class MainWindow(MoodLoader):
         """
         # Set up some variables for later. 'wz_flag' is a 'run_addons() argument,
         # and 'addon_path' is the absolute addon path of the currently active addon.
-        wz_flag = ""
         if addon_type == "/maps/":
-            addon_path = self.config_dir + addon_type + self.maps_listview.currentIndex().data(role=3)
+            addon_path = re.search("[0-9](\S+?).wz", self.config_dir + addon_type +
+                                   self.maps_listview.currentIndex().data(role=3)).group()
         elif addon_type == "/mods/campaign/":
             wz_flag = "--mod_ca="
+            addon_path = self.config_dir + addon_type + self.cam_mods_listview.currentIndex().data(role=3)
         elif addon_type == "/mods/global/":
             wz_flag = "--mod="
+            addon_path = self.config_dir + addon_type + self.global_mods_listview.currentIndex().data(role=3)
         elif addon_type == "/mods/multiplay/":
             wz_flag = "--mod_mp="
+            addon_path = self.config_dir + addon_type + self.multiplayer_mods_listview.currentIndex().data(role=3)
 
 
         # Create the menu
@@ -334,7 +337,7 @@ class MainWindow(MoodLoader):
                 run_addons_action.triggered.connect(lambda: self.run_addons(wz_flag))
                 menu.addAction(run_addons_action)
 
-        # Create option for the properties dialog
+        # Create action for the properties dialog
         properties_dialog_action = QtGui.QAction("Properties", self)
         properties_dialog_action.triggered.connect(lambda: PropertiesDialog(addon_path))
         menu.addAction(properties_dialog_action)

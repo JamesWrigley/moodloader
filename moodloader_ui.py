@@ -153,7 +153,7 @@ class MoodLoader(QtGui.QWidget):
 
         self.setLayout(main_vbox)
         self.setWindowTitle("Warzone 2100 Mood Loader")
-        self.resize(1050, 500)
+        self.resize(1050, 530)
         self.setFixedWidth(1050)
         self.center()
         self.show()
@@ -173,7 +173,8 @@ class PropertiesDialog(QtGui.QDialog):
 
     def condense_addon(self, addon_name):
         """
-        A little helper function to pretty-ify output for the QListView's.
+        A little helper function that removes the hash (if there is one) and
+        extension from a file name.
         """
         # The hash length is always 64 chars, so by this we check if one is in the name
         if len(addon_name) > 64:
@@ -183,14 +184,41 @@ class PropertiesDialog(QtGui.QDialog):
             return(addon_name.replace(".wz", ""))
 
 
+    def get_addon_type(self, addon_path):
+        if "/maps/" in addon_path:
+            return("Map")
+        elif "/global/" in addon_path:
+            return("Global Mod")
+        elif "/campaign/" in addon_path:
+            return("Campaign Mod")
+        else:
+            return("Multiplayer Mod")
+
+
     def initUI(self):
         ### Make all the layouts ###
         main_vbox = QtGui.QVBoxLayout()
         main_label_hbox = QtGui.QHBoxLayout()
 
-        ### Label widgets ###
+        info_hbox = QtGui.QHBoxLayout()
+        info_labels_vbox = QtGui.QVBoxLayout()
+        info_data_vbox = QtGui.QVBoxLayout()
+
+        ### Create widgets ###
+
+        # Main label, displaying the addon name
         main_label = QtGui.QLabel(self.condense_addon(os.path.basename(self.addon_path)))
         main_label.setFont(QtGui.QFont("Liberation Mono", 20))
+
+        # Create info labels
+        addon_info_labels_list = []
+        addon_info_list = []
+
+        addon_type_label = QtGui.QLabel("Addon Type:")
+        addon_type_info = QtGui.QLabel(self.get_addon_type(self.addon_path))
+        addon_info_labels_list.append(addon_type_label)
+        addon_info_list.append(addon_type_info)
+        
 
         ### Pack everything ###
 
@@ -199,8 +227,19 @@ class PropertiesDialog(QtGui.QDialog):
         main_label_hbox.addWidget(main_label)
         main_label_hbox.addStretch()
 
+        # Pack the info labels/data
+        for label in addon_info_labels_list:
+            info_labels_vbox.addWidget(label)        
+        for label in addon_info_list:
+            info_data_vbox.addWidget(label)
+
+        info_hbox.addLayout(info_labels_vbox)
+        info_hbox.addLayout(info_data_vbox)
+        info_hbox.insertSpacing(-1, 150)
+
         # Pack it all into main_vbox
         main_vbox.addLayout(main_label_hbox)
+        main_vbox.addLayout(info_hbox)
         main_vbox.addStretch()
 
         self.setLayout(main_vbox)
