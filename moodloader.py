@@ -304,8 +304,8 @@ class MainWindow(MoodLoader):
         # Set up some variables for later. 'wz_flag' is a 'run_addons() argument,
         # and 'addon_path' is the absolute addon path of the currently active addon.
         if addon_type == "/maps/":
-            addon_path = re.search("[0-9](\S+?).wz", self.config_dir + addon_type +
-                                   self.maps_listview.currentIndex().data(role=3)).group()
+            addon_path = self.config_dir + addon_type + re.search("[0-9](\S+?).wz",
+                                                                  self.maps_listview.currentIndex().data(role=3)).group()
         elif addon_type == "/mods/campaign/":
             wz_flag = "--mod_ca="
             addon_path = self.config_dir + addon_type + self.cam_mods_listview.currentIndex().data(role=3)

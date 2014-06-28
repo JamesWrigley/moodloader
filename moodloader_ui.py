@@ -18,6 +18,7 @@
 
 import os
 import re
+import zipfile
 from PyQt4 import QtGui
 
 class MoodLoader(QtGui.QWidget):
@@ -195,6 +196,18 @@ class PropertiesDialog(QtGui.QDialog):
             return("Multiplayer Mod")
 
 
+    def get_map_stats(self, addon_path):
+        """
+        Get a bunch of statistics from the map in 'addon_path'. ATM, this is
+        limited to the number of oils on the map.
+        """
+        addon = zipfile.ZipFile(addon_path)
+        addon_files = addon.namelist()
+
+        feature_ini = next(path for path in addon_files if "feature.ini" in path)
+        return(str(str(addon.read(feature_ini)).count("OilResource")))
+
+
     def initUI(self):
         ### Make all the layouts ###
         main_vbox = QtGui.QVBoxLayout()
@@ -218,7 +231,11 @@ class PropertiesDialog(QtGui.QDialog):
         addon_type_info = QtGui.QLabel(self.get_addon_type(self.addon_path))
         addon_info_labels_list.append(addon_type_label)
         addon_info_list.append(addon_type_info)
-        
+
+        oil_count_label = QtGui.QLabel("Number of oils:")
+        oil_count = QtGui.QLabel(self.get_map_stats(self.addon_path))
+        addon_info_labels_list.append(oil_count_label)
+        addon_info_list.append(oil_count)
 
         ### Pack everything ###
 
@@ -243,5 +260,5 @@ class PropertiesDialog(QtGui.QDialog):
         main_vbox.addStretch()
 
         self.setLayout(main_vbox)
-        self.resize(420, 350)
+        self.setFixedSize(420, 350)
         self.exec_()
