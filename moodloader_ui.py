@@ -20,6 +20,8 @@ import os
 import re
 import zipfile
 from PyQt4 import QtGui
+import properties_dialog
+
 
 class MoodLoader(QtGui.QWidget):
     """
@@ -185,29 +187,6 @@ class PropertiesDialog(QtGui.QDialog):
             return(addon_name.replace(".wz", ""))
 
 
-    def get_addon_type(self, addon_path):
-        if "/maps/" in addon_path:
-            return("Map")
-        elif "/global/" in addon_path:
-            return("Global Mod")
-        elif "/campaign/" in addon_path:
-            return("Campaign Mod")
-        else:
-            return("Multiplayer Mod")
-
-
-    def get_map_stats(self, addon_path):
-        """
-        Get a bunch of statistics from the map in 'addon_path'. ATM, this is
-        limited to the number of oils on the map.
-        """
-        addon = zipfile.ZipFile(addon_path)
-        addon_files = addon.namelist()
-
-        feature_ini = next(path for path in addon_files if "feature.ini" in path)
-        return(str(str(addon.read(feature_ini)).count("OilResource")))
-
-
     def initUI(self):
         ### Make all the layouts ###
         main_vbox = QtGui.QVBoxLayout()
@@ -228,12 +207,12 @@ class PropertiesDialog(QtGui.QDialog):
         addon_info_list = []
 
         addon_type_label = QtGui.QLabel("Addon Type:")
-        addon_type_info = QtGui.QLabel(self.get_addon_type(self.addon_path))
+        addon_type_info = QtGui.QLabel(properties_dialog.get_addon_type(self.addon_path))
         addon_info_labels_list.append(addon_type_label)
         addon_info_list.append(addon_type_info)
 
-        oil_count_label = QtGui.QLabel("Number of oils:")
-        oil_count = QtGui.QLabel(self.get_map_stats(self.addon_path))
+        oil_count_label = QtGui.QLabel("Number of oils per player:")
+        oil_count = QtGui.QLabel(properties_dialog.get_map_stats(self.addon_path))
         addon_info_labels_list.append(oil_count_label)
         addon_info_list.append(oil_count)
 
@@ -252,10 +231,10 @@ class PropertiesDialog(QtGui.QDialog):
 
         info_hbox.addLayout(info_labels_vbox)
         info_hbox.addLayout(info_data_vbox)
-        info_hbox.insertSpacing(-1, 150)
 
         # Pack it all into main_vbox
         main_vbox.addLayout(main_label_hbox)
+        main_vbox.insertSpacing(1, 20)
         main_vbox.addLayout(info_hbox)
         main_vbox.addStretch()
 
