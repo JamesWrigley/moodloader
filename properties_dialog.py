@@ -36,20 +36,23 @@ def get_addon_type(addon_path):
         return("Multiplayer Mod")
 
 
-def get_map_stats(addon_path):
+def get_map_stats(map_path):
     """
-    Get a bunch of statistics from the map in 'addon_path'. ATM, this is
+    Get a bunch of statistics from the map in 'map_path'. ATM, this is
     limited to the number of oils on the map.
     """
-    addon = zipfile.ZipFile(addon_path)
-    addon_files = addon.namelist()
+    map = zipfile.ZipFile(map_path)
+    map_files = map.namelist()
+    map_stats = {}
 
     # Get the max number of players
-    player_count = re.search("\d+", os.path.basename(addon_path)).group()
+    player_count = re.search("\d+", os.path.basename(map_path)).group()
+    map_stats["players"] = player_count
 
     # Get the number of oils in the map, both total and per-player
-    feature_ini_path = next(path for path in addon_files if "feature.ini" in path)
-    total_oils = str(addon.read(feature_ini_path)).count("OilResource")
-    oil_count_label = str(round(total_oils / int(player_count), 2)) + \
-                      " (total: %s)" % total_oils
-    return(oil_count_label)
+    feature_ini_path = next(path for path in map_files if "feature.ini" in path)
+    total_oils = str(map.read(feature_ini_path)).count("OilResource")
+    map_stats["oils"] = str(round(total_oils / int(player_count), 2)) + \
+                          " (total: %s)" % total_oils
+
+    return(map_stats)

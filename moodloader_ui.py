@@ -203,6 +203,7 @@ class PropertiesDialog(QtGui.QDialog):
         main_label.setFont(QtGui.QFont("Liberation Mono", 20))
 
         # Create info labels
+        map_stats = properties_dialog.get_map_stats(self.addon_path)
         addon_info_labels_list = []
         addon_info_list = []
 
@@ -211,8 +212,13 @@ class PropertiesDialog(QtGui.QDialog):
         addon_info_labels_list.append(addon_type_label)
         addon_info_list.append(addon_type_info)
 
+        players_label = QtGui.QLabel("Number of players:")
+        players_count = QtGui.QLabel(map_stats["players"])
+        addon_info_labels_list.append(players_label)
+        addon_info_list.append(players_count)
+
         oil_count_label = QtGui.QLabel("Number of oils per player:")
-        oil_count = QtGui.QLabel(properties_dialog.get_map_stats(self.addon_path))
+        oil_count = QtGui.QLabel(map_stats["oils"])
         addon_info_labels_list.append(oil_count_label)
         addon_info_list.append(oil_count)
 

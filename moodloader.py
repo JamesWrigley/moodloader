@@ -337,10 +337,11 @@ class MainWindow(MoodLoader):
                 run_addons_action.triggered.connect(lambda: self.run_addons(wz_flag))
                 menu.addAction(run_addons_action)
 
-        # Create action for the properties dialog
-        properties_dialog_action = QtGui.QAction("Properties", self)
-        properties_dialog_action.triggered.connect(lambda: PropertiesDialog(addon_path))
-        menu.addAction(properties_dialog_action)
+        # Create action for the properties dialog, this only works with maps ATM
+        if addon_type == "/maps/":
+            properties_dialog_action = QtGui.QAction("Properties", self)
+            properties_dialog_action.triggered.connect(lambda: PropertiesDialog(addon_path))
+            menu.addAction(properties_dialog_action)
 
         # Display menu at the cursor position
         menu.exec_(QtGui.QCursor.pos())
