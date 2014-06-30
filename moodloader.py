@@ -232,7 +232,8 @@ class MainWindow(MoodLoader):
 
     def check_addon(self, addon_path):
         """
-        Checks the addon for validity.
+        Checks the addon for validity. If the addon is a map mod we return 1,
+        and if its file layout is mutilated we return 2, else we return 0.
         """
         forbidden_files = ['Thumbs.db', 'Desktop.ini', '.DS_Store']
         forbidden_extensions = ['.bak', '.tmp', '.wz', '.zip', '.js', '.png']
@@ -243,12 +244,14 @@ class MainWindow(MoodLoader):
             addon_file_extensions = [os.path.splitext(path)[1] for path in addon_files]
 
         # Make sure all cases are covered
-        if all(ext in addon_file_extensions for ext in required_extensions) and not \
-           any(ext in addon_file_extensions for ext in forbidden_extensions) and not \
-           any(illegal in addon_files for illegal in forbidden_files):
-            return True
+        if any("\\" in file for file in addon_files):
+            return(2)
+        elif not (all(ext in addon_file_extensions for ext in required_extensions) and not \
+             any(ext in addon_file_extensions for ext in forbidden_extensions) and not \
+             any(illegal in addon_files for illegal in forbidden_files)):
+            return(1)
         else:
-            return False
+            return(0)
 
 
     def populate_listviews(self):
@@ -289,9 +292,13 @@ class MainWindow(MoodLoader):
                     addon_item.setToolTip(addon)
                     addon_item.setEditable(False)
                     # Mark all map-mods
-                    if directory == maps_dir and not self.check_addon(directory + addon):
-                        addon_item.setForeground(QtCore.Qt.red)
-                        addon_item.setToolTip("<p align=center style=white-space:pre>%s <br>This is a map-mod.</p>" % addon)
+                    if directory == maps_dir:
+                        if self.check_addon(directory + addon) == 1:
+                            addon_item.setForeground(QtCore.Qt.red)
+                            addon_item.setToolTip("<p align=center style=white-space:pre>%s <br>This is a map-mod.</p>" % addon)
+                        elif self.check_addon(directory + addon) == 2:
+                            addon_item.setForeground(QtCore.Qt.darkRed)
+                            addon_item.setToolTip("<p align=center style=white-space:pre>%s <br>This map is corrupted.</p>" % addon)
 
                     data_model.appendRow(addon_item)
 
@@ -302,7 +309,7 @@ class MainWindow(MoodLoader):
         available operations to perform on the addon.
         """
         # Set up some variables for later. 'wz_flag' is a 'run_addons() argument,
-        # and 'addon_path' is the absolute addon path of the currently active addon.
+        # and 'addon_path' is the absolute path of the currently active addon.
         if addon_type == "/maps/":
             addon_path = self.config_dir + addon_type + re.search("[0-9](\S+?).wz",
                                                                   self.maps_listview.currentIndex().data(role=3)).group()
@@ -338,7 +345,7 @@ class MainWindow(MoodLoader):
                 menu.addAction(run_addons_action)
 
         # Create action for the properties dialog, this only works with maps ATM
-        if addon_type == "/maps/":
+        if addon_type == "/maps/" and self.check_addon(addon_path) != 2:
             properties_dialog_action = QtGui.QAction("Properties", self)
             properties_dialog_action.triggered.connect(lambda: PropertiesDialog(addon_path))
             menu.addAction(properties_dialog_action)
