@@ -356,6 +356,7 @@ class MainWindow(MoodLoader):
 
 def main():
     app = QtGui.QApplication(sys.argv)
+    app.setWindowIcon(QtGui.QIcon("icon.png"))
     window = MainWindow()
 
     window.show()
