@@ -297,8 +297,8 @@ class MainWindow(MoodLoader):
                             addon_item.setForeground(QtCore.Qt.red)
                             addon_item.setToolTip("<p align=center style=white-space:pre>%s <br>This is a map-mod.</p>" % addon)
                         elif self.check_addon(directory + addon) == 2:
-                            addon_item.setForeground(QtCore.Qt.darkRed)
-                            addon_item.setToolTip("<p align=center style=white-space:pre>%s <br>This map is corrupted.</p>" % addon)
+                            addon_item.setForeground(QtCore.Qt.darkMagenta)
+                            addon_item.setToolTip("<p align=center style=white-space:pre>%s <br>This map has corrupted paths.</p>" % addon)
 
                     data_model.appendRow(addon_item)
 
