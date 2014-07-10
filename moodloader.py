@@ -207,13 +207,13 @@ class MainWindow(MoodLoader):
         # Retrieve the tooltips (which are the filenames) from the selected items
         if wz_flag == "--mod_ca=":
             selected_addons = [mod.data(role=3) for mod in self.cam_mods_listview.selectedIndexes()]
-            for mod in selected_addons: args.append("--mod_ca=%s" % mod)
+            for mod in selected_addons: args.append("--mod_ca={0}".format(mod))
         elif wz_flag == "--mod=":
             selected_addons = [mod.data(role=3) for mod in self.global_mods_listview.selectedIndexes()]
-            for mod in selected_addons: args.append("--mod=%s" % mod)
+            for mod in selected_addons: args.append("--mod={0}".format(mod))
         elif wz_flag == "--mod_mp=":
             selected_addons = [mod.data(role=3) for mod in self.multiplayer_mods_listview.selectedIndexes()]
-            for mod in selected: args.append("--mod_mp=%s" % mod)
+            for mod in selected: args.append("--mod_mp={0}".format(mod))
 
         subprocess.Popen(args)
 
@@ -295,10 +295,10 @@ class MainWindow(MoodLoader):
                     if directory == maps_dir:
                         if self.check_addon(directory + addon) == 1:
                             addon_item.setForeground(QtCore.Qt.red)
-                            addon_item.setToolTip("<p align=center style=white-space:pre>%s <br>This is a map-mod.</p>" % addon)
+                            addon_item.setToolTip("<p align=center style=white-space:pre>{0} <br>This is a map-mod.</p>".format(addon))
                         elif self.check_addon(directory + addon) == 2:
                             addon_item.setForeground(QtCore.Qt.darkMagenta)
-                            addon_item.setToolTip("<p align=center style=white-space:pre>%s <br>This map has corrupted paths.</p>" % addon)
+                            addon_item.setToolTip("<p align=center style=white-space:pre>{0} <br>This map has corrupted paths.</p>".format(addon))
 
                     data_model.appendRow(addon_item)
 

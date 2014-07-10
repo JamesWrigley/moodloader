@@ -50,9 +50,15 @@ def get_map_stats(map_path):
     map_stats["players"] = player_count
 
     # Get the number of oils in the map, both total and per-player
-    feature_ini_path = next(path for path in map_files if "feature.ini" in path)
+    try:
+        feature_ini_path = next(path for path in map_files if "feature.ini" in path)
+    except StopIteration as error:
+        feature_ini_path = "Error, could not find feature.ini"
+        map_stats["oils"] = feature_ini_path
+        return(map_stats)
+
     total_oils = str(map.read(feature_ini_path)).count("OilResource")
     map_stats["oils"] = str(round(total_oils / int(player_count), 2)) + \
-                          " (total: %s)" % total_oils
+                          " (total: {0})".format(total_oils)
 
     return(map_stats)
