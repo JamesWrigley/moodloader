@@ -213,7 +213,7 @@ class MainWindow(MoodLoader):
             for mod in selected_addons: args.append("--mod={0}".format(mod))
         elif wz_flag == "--mod_mp=":
             selected_addons = [mod.data(role=3) for mod in self.multiplayer_mods_listview.selectedIndexes()]
-            for mod in selected: args.append("--mod_mp={0}".format(mod))
+            for mod in selected_addons: args.append("--mod_mp={0}".format(mod))
 
         subprocess.Popen(args)
 
